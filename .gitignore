@@ -1,0 +1,11 @@
+*.tmp
+*.log
+*.idea
+.DS_Store
+.eslintrc.js
+node_modules
+/config/parameters.json
+aws.env
+aws.env.encrypted
+codeship.aes
+var.env

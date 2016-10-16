@@ -1,0 +1,18 @@
+version: '2'
+
+services: 
+
+  nodejs:
+    build: .
+    volumes: 
+      - ./lib:/api/lib
+      - ./config:/api/config
+    env_file:
+      - var.env
+
+  frontend:
+    image: prayforhana/test2
+    links:
+      - nodejs:nodejs
+    ports:
+      - "80:80"
