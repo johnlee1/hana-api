@@ -19,7 +19,13 @@ const plugins = [];
 server.connection({
     host: "0.0.0.0",
     port: 3000,
-    routes: { cors: true }
+    //routes: { cors: true },
+    routes: {
+        cors: {
+            //origin: ['*'],
+            additionalHeaders: ['hanaauthtoken']
+        }
+      }    
 });
 
 server.database = db;

@@ -9,19 +9,11 @@ const User = require('../lib/users/users-model');
 
 
 function validate(decoded, token, cb) {
-    console.log('helloone');
-    console.log(decoded);
-    console.log(token);
-    console.log(cb);
-    console.log(token.iat);
     let ttl = 90000000;
     let diff = Moment().diff(Moment(token.iat * 1000));
-    console.log(diff);
     if (diff > ttl) {
-        console.log('hellotwo');
         return callback(null, false);
     }
-    console.log('hellothree');
     return cb(null, true, decoded);
 }
 

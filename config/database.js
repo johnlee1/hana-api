@@ -5,8 +5,7 @@ const Mongoose = require('mongoose');
 
 
 // const parameters = require('./parameters.json');
-
-Mongoose.connect(process.env.DB_CONNECTION)
+//Mongoose.connect(process.env.DB_CONNECTION)
 
 const db = Mongoose.connection;
 db.on('error', console.error.bind(console, 'Connection error'));

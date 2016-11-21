@@ -9,9 +9,11 @@ services:
       - ./config:/api/config
     env_file:
       - var.env
+    ports:
+      - "3000:3000"
 
   frontend:
-    image: prayforhana/test2
+    image: prayforhana/test3:0.1
     links:
       - nodejs:nodejs
     ports:
