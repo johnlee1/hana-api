@@ -3,9 +3,10 @@
 *.idea
 .DS_Store
 .eslintrc.js
-node_modules
-/config/parameters.json
+awsconfig.json
 aws.env
 aws.env.encrypted
 codeship.aes
+node_modules
+parameters.json
 var.env

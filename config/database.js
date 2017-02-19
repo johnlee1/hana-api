@@ -4,8 +4,6 @@
 const Mongoose = require('mongoose');
 
 
-//const parameters = require('./parameters.json');
-//Mongoose.connect('mongodb://' + parameters.database.host + '/' + parameters.database.db);
 Mongoose.connect(process.env.DB_CONNECTION)
 
 const db = Mongoose.connection;

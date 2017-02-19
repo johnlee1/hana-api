@@ -2,7 +2,6 @@
 
 
 const HapiAuthJwt = require('hapi-auth-jwt2');
-// const Parameters = require('./parameters');
 const Moment = require('moment');
 
 const User = require('../lib/users/users-model');

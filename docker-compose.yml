@@ -18,3 +18,4 @@ services:
       - nodejs:nodejs
     ports:
       - "80:80"
+      

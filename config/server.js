@@ -6,15 +6,13 @@ const Hapi = require('hapi');
 
 
 // configurations files
-// const parameters = require('./parameters');
 const auth = require('./auth');
-const routes = require('./routes');
 const db = require('./database');
+const routes = require('./routes');
 
 
 // create a hapi server
 const server = new Hapi.Server();
-const plugins = [];
 
 server.connection({
     host: "0.0.0.0",
@@ -32,6 +30,7 @@ server.database = db;
 
 
 // plugins management
+const plugins = [];
 plugins.push({register: auth});
 server.register(plugins, (err) => {
     if (err) {
