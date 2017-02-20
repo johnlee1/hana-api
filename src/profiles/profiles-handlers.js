@@ -59,7 +59,7 @@ exports.getMyProfile = {
             } else {
                 return reply(profile);
             }
-        })
+        });
     }
 };
 
@@ -78,7 +78,7 @@ exports.searchProfiles = {
             else {
                 return reply(profiles);
             }
-        })  
+        });
     }
 };
 
@@ -87,7 +87,7 @@ exports.searchProfiles = {
 exports.getProfile = {
     auth: 'jwt',
     handler: (request, reply) => {
-        console.log('whatever');
+
         let user_id = request.auth.credentials.user_id;
         let profile_id = request.params.profile_id;
 
@@ -104,10 +104,10 @@ exports.getProfile = {
                         return reply(Boom.badRequest());
                     }
                     else if (me.following.indexOf(profile_id) > -1) {
-                        return reply({level: "following", profile: profile});
+                        return reply({level: 'following', profile: profile});
                     }
                     else {
-                        return reply({level: "notFollowing", profile: profile});
+                        return reply({level: 'notFollowing', profile: profile});
                     }
                 });
         });
@@ -144,7 +144,7 @@ exports.followProfile = {
                 followed_profile.save();
 
                 return reply({message:'success'});
-            }) 
+            });
         });
     }
 };
@@ -161,7 +161,7 @@ exports.updateMyProfile = {
     },
     handler: (request, reply) => {
 
-        let profile_id = request.auth.credentials.profile_id
+        let profile_id = request.auth.credentials.profile_id;
 
         let update = {
             name: request.payload.name,
@@ -173,7 +173,7 @@ exports.updateMyProfile = {
                 return reply(Boom.badRequest());
             }
             return reply({message: 'success'});
-        })  
+        });
     }
 };
 
@@ -206,7 +206,7 @@ exports.unfollowProfile = {
                 unfollowed_profile.save();
 
                 return reply({message:'success'});
-            }) 
+            });
         });
     }
 };

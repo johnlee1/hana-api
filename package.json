@@ -4,7 +4,8 @@
   "description": "prayer app server",
   "main": "index.js",
   "scripts": {
-    "test": "lab"
+    "test": "lab",
+    "lint": "eslint src"
   },
   "author": "",
   "license": "MIT",
@@ -23,6 +24,7 @@
     "nodemailer": "^3.1.1"
   },
   "devDependencies": {
+    "eslint": "^3.15.0",
     "lab": "^10.8.2"
   }
 }

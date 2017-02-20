@@ -5,20 +5,20 @@ const Mongoose = require('mongoose');
 
 
 const Schema = new Mongoose.Schema({
-	name: {
-		type: String,
+    name: {
+        type: String,
         required: true
-	},
-	bio: { 
-		type: String
-	},
+    },
+    bio: { 
+        type: String
+    },
     posts: {
         type: [{ type: Mongoose.Schema.ObjectId, ref: 'Post' }],
         default: []
     },
     followers: {
-    	type: [{ type: Mongoose.Schema.ObjectId, ref: 'Profile' }],
-    	default: []
+        type: [{ type: Mongoose.Schema.ObjectId, ref: 'Profile' }],
+        default: []
     },
 });
 

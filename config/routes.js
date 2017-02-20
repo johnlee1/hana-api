@@ -4,19 +4,19 @@
 let routes = [];
 
 
-const usersRoutes = require('../lib/users/users-routes');
+const usersRoutes = require('../src/users/users-routes');
 routes = routes.concat(usersRoutes);
 
-const postsRoutes = require('../lib/posts/posts-routes');
+const postsRoutes = require('../src/posts/posts-routes');
 routes = routes.concat(postsRoutes);
 
-const profilesRoutes = require('../lib/profiles/profiles-routes');
+const profilesRoutes = require('../src/profiles/profiles-routes');
 routes = routes.concat(profilesRoutes);
 
-const pagesRoutes = require('../lib/pages/pages-routes');
+const pagesRoutes = require('../src/pages/pages-routes');
 routes = routes.concat(pagesRoutes);
 
-const groupsRoutes = require('../lib/groups/groups-routes');
+const groupsRoutes = require('../src/groups/groups-routes');
 routes = routes.concat(groupsRoutes);
 
 

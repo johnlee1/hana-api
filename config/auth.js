@@ -4,7 +4,7 @@
 const HapiAuthJwt = require('hapi-auth-jwt2');
 const Moment = require('moment');
 
-const User = require('../lib/users/users-model');
+const User = require('../src/users/users-model');
 
 
 function validate(decoded, token, cb) {

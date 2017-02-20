@@ -5,15 +5,15 @@ const Mongoose = require('mongoose');
 
 
 const Schema = new Mongoose.Schema({
-	email: {
-		type: String,
-		unique: true,
-		required: true
-	},
-	password: {
-		type: String, 
-		required: true
-	},
+    email: {
+        type: String,
+        unique: true,
+        required: true
+    },
+    password: {
+        type: String, 
+        required: true
+    },
     isVerified: {
         type: Boolean,
         default: false
@@ -28,13 +28,13 @@ const Schema = new Mongoose.Schema({
         default: []
     },
     adminPages: {
-    	type: [{ type: Mongoose.Schema.ObjectId, ref: 'Page' }],
-    	default: []
+        type: [{ type: Mongoose.Schema.ObjectId, ref: 'Page' }],
+        default: []
     },
-	memberPages: {
-		type: [{ type: Mongoose.Schema.ObjectId, ref: 'Page' }],
-		default: []
-	},
+    memberPages: {
+        type: [{ type: Mongoose.Schema.ObjectId, ref: 'Page' }],
+        default: []
+    },
     adminGroups: {
         type: [{ type: Mongoose.Schema.ObjectId, ref: 'Group' }],
         default: []

@@ -10,14 +10,14 @@ const User = require('../users/users-model');
 
 // [POST] api/groups
 exports.createGroup = {   
-	auth: 'jwt',
-	validate: {
+    auth: 'jwt',
+    validate: {
         payload: {
             name: Joi.string().required(),
             description: Joi.string().required()
         }
     },
-	handler: (request, reply) => {
+    handler: (request, reply) => {
 
         let user_id = request.auth.credentials.user_id;
 
@@ -44,9 +44,9 @@ exports.createGroup = {
                 user.adminGroups.push(group._id);
                 user.save();    
                 return reply(group);
-            }) 
+            }); 
         });
-	}
+    }
 };
 
 
@@ -64,8 +64,8 @@ exports.getGroups = {
                     return reply(Boom.badRequest());
                 }
                 let groups = {
-                	adminGroups: user.adminGroups, 
-                	memberGroups: user.memberGroups
+                    adminGroups: user.adminGroups, 
+                    memberGroups: user.memberGroups
                 };
                 return reply(groups);
             });
@@ -95,7 +95,7 @@ exports.getGroup = {
             else { 
                 return reply({level: 'notAllowed', group: group});
             }
-        }) 
+        }); 
     }
 };
 
@@ -120,7 +120,7 @@ exports.updateGroup = {
             group.name = name;
             group.description = description;
             group.save();
-        }) 
+        });
     }
 };
 
@@ -140,7 +140,7 @@ exports.leaveGroup = {
             }
 
             let adminIndex = user.adminGroups.indexOf(user_id);
-            let memberIndex = user.memberGroups.indexOf(member_id);
+            let memberIndex = user.memberGroups.indexOf(group_id);
 
             // remove group reference from user
             if (adminIndex > -1) {
@@ -170,7 +170,7 @@ exports.leaveGroup = {
                 user.save();
                 group.save();
                 return reply({msg: 'success'});
-            }) 
-        })
+            });
+        });
     }
 };

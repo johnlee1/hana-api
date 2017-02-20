@@ -54,7 +54,7 @@ exports.getPage = {
                 else { 
                     return reply({level: 'none', page: page});
                 }                
-            })
+            });
     }
 };
 
@@ -71,7 +71,7 @@ exports.searchPages = {
             else {
                 return reply(pages);
             }
-        })  
+        });
     }
 };
 
@@ -112,7 +112,7 @@ exports.createPage = {
                 user.adminPages.push(page._id);
                 user.save();    
                 return reply(page);
-            }) 
+            });
         });
     }
 };
@@ -146,7 +146,7 @@ exports.followPage = {
                 page.save();
 
                 return reply({level:'follower'});
-            }) 
+            });
         });
     }
 };
@@ -180,7 +180,7 @@ exports.unfollowPage = {
                 page.save();
 
                 return reply({level:'none'});
-            }) 
+            });
         });
     }
 };
@@ -215,10 +215,10 @@ exports.updatePage = {
                     } else {
                         return reply({message: 'success'});
                     }
-                }) 
+                });
             } else {
                 return reply(Boom.forbidden('You must be an admin to perform this action.'));
             }
-        })  
+        });
     }
 };

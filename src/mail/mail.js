@@ -8,7 +8,7 @@ const nodemailer = require('nodemailer');
 
 
 // configure AWS SDK
-aws.config.loadFromPath('./lib/mail/awsconfig.json');
+aws.config.loadFromPath('./src/mail/awsconfig.json');
 aws.config.correctClockSkew = true;
 
 

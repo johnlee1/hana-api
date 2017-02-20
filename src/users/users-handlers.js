@@ -17,10 +17,10 @@ const _privateKey = process.env.JWT_PRIVATE_KEY;
 // [GET] /api/test
 exports.test = {
     handler: (request,reply) => {
-        console.log("noway");
+        console.log('noway');
         return reply('ecs updated!! :)');
     }
-}
+};
 
 
 // [GET] /api/users/confirm/{token}
@@ -65,7 +65,7 @@ exports.confirm = {
                                             profile_id: profile._id
                                         };
                                         let token = Jwt.sign(tokenData, _privateKey);
-                                        return reply({message: "success", token: token});
+                                        return reply({message: 'success', token: token});
                                     }
                                 });
                             }
@@ -97,11 +97,11 @@ exports.register = {
 
         Bcrypt.genSalt(10, (err, salt) => {
             if (err) {
-                return reply({error:"Sign up unsuccessful. Try again later."});
+                return reply({error:'Sign up unsuccessful. Try again later.'});
             }
             Bcrypt.hash(password, salt, (err, hash) => {
                 if (err) {
-                    return reply({error:"Invalid Sign Up Information"});
+                    return reply({error:'Invalid Sign Up Information'});
                 }
                 // create new profile
                 let profile = new Profile({
@@ -127,14 +127,14 @@ exports.register = {
                                     MailService.sendEmail('Verify your email address', templateFile, user.email, {token: token});
                                     return reply({token: token});
                                 } catch (e) {
-                                    return reply({error:"Sign up unsuccessful. Try again later."});
+                                    return reply({error:'Sign up unsuccessful. Try again later.'});
                                 }
                             } else {
-                                return reply({error:"Invalid Sign Up Information"});
+                                return reply({error:'Invalid Sign Up Information'});
                             }
                         });
                     } else {
-                        return reply({error:"Invalid Sign Up Information"});
+                        return reply({error:'Invalid Sign Up Information'});
                     }
                 });
             });
@@ -158,11 +158,11 @@ exports.login = {
 
         User.findOne({email: email}, (err, user) => {
             if (err) {
-                return reply({error:"Incorrect Login Information"});
+                return reply({error:'Incorrect Login Information'});
             } else if (user && user.isVerified) {
                 Bcrypt.compare(password, user.password, (err, res) => {
                     if (err) {
-                        return reply({error:"Incorrect Login Information"});
+                        return reply({error:'Incorrect Login Information'});
                     }
                     else if (res) {
                         let tokenData = {
@@ -173,13 +173,13 @@ exports.login = {
                         return reply({token: token});
                     } 
                     else {
-                        return reply({error:"Incorrect Login Information"});
+                        return reply({error:'Incorrect Login Information'});
                     }
                 });
             } else if (user && !user.isVerified) {
-                return reply({error:"Email Address Verification Required"});
+                return reply({error:'Email Address Verification Required'});
             } else {
-                return reply({error:"Incorrect Login Information"});
+                return reply({error:'Incorrect Login Information'});
             }
         });
     }
@@ -227,7 +227,7 @@ exports.updatePassword = {
                                             user.save((err, user) => {
 
                                                 if (!err) {
-                                                    return reply({success:"success"});
+                                                    return reply({success:'success'});
                                                 } else {
                                                     return reply(Boom.forbidden(err));
                                                 }
@@ -259,13 +259,14 @@ exports.delete = {
     },
     handler: (request, reply) => {
 
-        let user_id = request.auth.credentials.user_id;
+        const password = request.payload.password;
+        const user_id = request.auth.credentials.user_id;
         
         User.findById(user_id, (err, user) => {
             if (err) {
                 return reply(Boom.internal('Error retrieving user'));
             } else if (user) {
-                Bcrypt.compare(oldPassword, user.password, (err, res) => {
+                Bcrypt.compare(password, user.password, (err, res) => {
                     if (err) {
                         return reply(Boom.internal('Bcrypt comparison error'));
                     } else if (res) {        
@@ -273,7 +274,7 @@ exports.delete = {
                             if (err) {
                                 return reply(Boom.internal('Error retrieving user'));
                             } else if (user) {
-                                return reply({success:"success"});
+                                return reply({success:'success'});
                             } else {
                                 return reply(Boom.badRequest('Bad credentials'));
                             }

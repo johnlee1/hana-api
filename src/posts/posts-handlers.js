@@ -8,7 +8,6 @@ const Group   = require('../groups/groups-model');
 const Page    = require('../pages/pages-model');
 const Post    = require('./posts-model');
 const Profile = require('../profiles/profiles-model');
-const User    = require('../users/users-model');
 
 
 // [POST] /api/posts
@@ -50,7 +49,7 @@ exports.createPost = {
                 profile.posts.push(post._id);
                 profile.save();    
                 return reply({message: 'success'});
-            }) 
+            }); 
         });
     }
 };
@@ -99,14 +98,14 @@ exports.getPost = {
     auth: 'jwt',
     handler: (request, reply) => { 
 
-        let post_id = request.params.post_id
+        let post_id = request.params.post_id;
 
         Post.findById(post_id, (err, post) => {
             if (err) {
                 return reply(Boom.badRequest());
             }
             return reply(post);
-        })  
+        });
     }
 };
 
@@ -123,7 +122,7 @@ exports.updatePost = {
     },
     handler: (request, reply) => { 
 
-        let post_id = request.params.post_id
+        let post_id = request.params.post_id;
         let update = {
             subject: request.payload.subject,
             story: request.payload.story,
@@ -135,7 +134,7 @@ exports.updatePost = {
                 return reply(Boom.badRequest());
             }
             return reply({message: 'success'});
-        })  
+        });
     }
 };
 
@@ -146,7 +145,7 @@ exports.deletePost = {
     handler: (request, reply) => { 
 
         let profile_id = request.auth.credentials.profile_id;
-        let post_id = request.params.post_id
+        let post_id = request.params.post_id;
 
         // find profile and delete reference to post 
         Profile.findById(profile_id, 'posts', (err, profile) => {
@@ -218,7 +217,7 @@ exports.createPagePost = {
                     page.posts.push(post);
                     page.save();    
                     return reply({message: 'success'});
-                }) 
+                });
             });
         });
     }
@@ -275,7 +274,7 @@ exports.createGroupPost = {
                     group.posts.push(post);
                     group.save();    
                     return reply({message: 'success'});
-                }) 
+                });
             });
         });
     }
