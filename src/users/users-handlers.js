@@ -8,7 +8,6 @@ const Jwt = require('jsonwebtoken');
 const Moment = require('moment');
 
 const MailService = require('../mail/mail');
-const Profile = require('../profiles/profiles-model');
 const User = require('./users-model');
 
 const _privateKey = process.env.JWT_PRIVATE_KEY;
@@ -32,14 +31,14 @@ exports.confirm = {
     },
     handler: (request, reply) => {
 
-        let token = request.params.token;
+        const token = request.params.token;
 
         Jwt.verify(token, _privateKey, (err, decoded) => {
             if (decoded === undefined) {
                 return reply(Boom.badRequest('Invalid verification link'));
             }
-            let ttl = 90000000;
-            let diff = Moment().diff(Moment(decoded.iat * 1000));
+            const ttl = 90000000;
+            const diff = Moment().diff(Moment(decoded.iat * 1000));
             if (diff > ttl) {
                 return reply(Boom.badRequest('The token expired'));
             } else if (decoded.user_id) {
@@ -55,14 +54,14 @@ exports.confirm = {
                                 return reply(Boom.internal());
                             } else {
 
-                                Profile.findById(decoded.profile_id, (err, profile) => {
+                                user.findById(decoded.user_id, (err, user) => {
 
                                     if (err) {
                                         return reply(Boom.internal());  
                                     } else {
                                         let tokenData = {
                                             user_id: user._id,
-                                            profile_id: profile._id
+                                            user_id: user._id
                                         };
                                         let token = Jwt.sign(tokenData, _privateKey);
                                         return reply({message: 'success', token: token});
@@ -75,6 +74,113 @@ exports.confirm = {
             } else {
                 return reply(Boom.badRequest('Invalid verification link'));
             }
+        });
+    }
+};
+
+
+// [GET] /api/users/followers
+exports.followers = {
+    auth: 'jwt',
+    handler: (request, reply) => {
+
+        let user_id = request.auth.credentials.user_id;
+
+        User.findById(user_id)
+            .populate('followers', '-password')
+            .exec(function (err, user) {
+                if (err) {
+                    return reply(Boom.badRequest());
+                }
+                return reply(user.followers);
+            });
+    }
+};
+
+
+// [GET] /api/users/following
+exports.following = {
+    auth: 'jwt',
+    handler: (request, reply) => {
+
+        let user_id = request.auth.credentials.user_id;
+
+        User.findById(user_id)
+            .populate('following', '-password')
+            .exec(function (err, user) {
+                if (err) {
+                    return reply(Boom.badRequest());
+                }
+                return reply(user.following);
+            });
+    }
+};
+
+
+// [GET] /api/users/me
+exports.getMe = {
+    auth: 'jwt',
+    handler: (request, reply) => {
+
+        let user_id = request.auth.credentials.user_id;
+
+        User.findById(user_id, (err, user) => {
+            if (err) {
+                return reply(Boom.badRequest());
+            } else {
+                return reply(user);
+            }
+        });
+    }
+};
+
+
+// [GET] /api/users/search
+exports.searchUsers = {
+    auth: 'jwt',
+    handler: (request, reply) => {
+        
+        let user_id = request.auth.credentials.user_id;
+        
+        User.find({name: new RegExp(request.query.q,'i'), _id: { $ne: user_id }}, function(err, users) {
+            if(err) {
+                return reply(Boom.badRequest());
+            }
+            else {
+                return reply(users);
+            }
+        });
+    }
+};
+
+
+// [GET] /api/users/{user_id}
+exports.getUser = {
+    auth: 'jwt',
+    handler: (request, reply) => {
+
+        const my_user_id = request.auth.credentials.user_id;
+        const user_id = request.params.user_id;
+
+        User.findById(my_user_id, (err, me) => {
+
+            if (err) {
+                return reply(Boom.internal('Error retrieving user'));
+            }
+
+            User.findById(user_id)
+                .populate('posts', null, { private: false })
+                .exec(function (err, user) {
+                    if (err) {
+                        return reply(Boom.badRequest());
+                    }
+                    else if (me.following.indexOf(user_id) > -1) {
+                        return reply({level: 'following', user: user});
+                    }
+                    else {
+                        return reply({level: 'notFollowing', user: user});
+                    }
+                });
         });
     }
 };
@@ -103,36 +209,25 @@ exports.register = {
                 if (err) {
                     return reply({error:'Invalid Sign Up Information'});
                 }
-                // create new profile
-                let profile = new Profile({
+                // create new user
+                let user = new User({
+                    email: email,
+                    password: hash,
                     name: name
                 });
-                profile.save((err, profile) => {
+                user.save((err, user) => {
                     if (!err) {
-                        // create new user
-                        let user = new User({
-                            email: email,
-                            password: hash,
-                            profile: profile.id
-                        });
-                        user.save((err, user) => {
-                            if (!err) {
-                                let tokenData = {
-                                    user_id: user._id,
-                                    profile_id: profile._id
-                                };
-                                let token = Jwt.sign(tokenData, _privateKey);
-                                try {
-                                    let templateFile = MailService.getMailTemplate('./lib/mail/register.ejs');
-                                    MailService.sendEmail('Verify your email address', templateFile, user.email, {token: token});
-                                    return reply({token: token});
-                                } catch (e) {
-                                    return reply({error:'Sign up unsuccessful. Try again later.'});
-                                }
-                            } else {
-                                return reply({error:'Invalid Sign Up Information'});
-                            }
-                        });
+                        let tokenData = {
+                            user_id: user._id
+                        };
+                        let token = Jwt.sign(tokenData, _privateKey);
+                        try {
+                            let templateFile = MailService.getMailTemplate('./src/mail/register.ejs');
+                            MailService.sendEmail('Verify your email address', templateFile, user.email, {token: token});
+                            return reply({token: token});
+                        } catch (e) {
+                            return reply({error:'Sign up unsuccessful. Try again later.'});
+                        }         
                     } else {
                         return reply({error:'Invalid Sign Up Information'});
                     }
@@ -166,8 +261,7 @@ exports.login = {
                     }
                     else if (res) {
                         let tokenData = {
-                            user_id: user._id,
-                            profile_id: user.profile
+                            user_id: user._id
                         };
                         let token = Jwt.sign(tokenData, _privateKey);
                         return reply({token: token});
@@ -249,6 +343,103 @@ exports.updatePassword = {
         }
     }
 };
+
+
+// [PUT] /api/users/follow/{user_id}
+exports.followUser = {
+    auth: 'jwt',
+    handler: (request, reply) => {
+
+        let user_id = request.auth.credentials.user_id;
+        let followed_user_id = request.params.user_id;
+        
+        User.findById(user_id, (err, user) => {
+
+            if (err) {
+                return reply(Boom.internal('Error retrieving user'));
+            }
+
+            user.following.push(followed_user_id);
+
+            User.findById(followed_user_id, (err, followed_user) => {
+
+                if (err) {
+                    return reply(Boom.badRequest());
+                } 
+
+                followed_user.followers.push(user_id);
+
+                user.save();
+                followed_user.save();
+
+                return reply({message:'success'});
+            });
+        });
+    }
+};
+
+
+// [PUT] /api/users/me
+exports.updateMe = {
+    auth: 'jwt',
+    validate: {
+        payload: {
+            name: Joi.string().required(),
+            bio: Joi.string()
+        }
+    },
+    handler: (request, reply) => {
+
+        let user_id = request.auth.credentials.user_id;
+
+        let update = {
+            name: request.payload.name,
+            bio: request.payload.bio
+        };
+
+        User.findByIdAndUpdate(user_id, {$set:update}, (err, user) => {
+            if (err) {
+                return reply(Boom.badRequest());
+            }
+            return reply({message: 'success'});
+        });
+    }
+};
+
+
+// [PUT] /api/users/unfollow/{user_id}
+exports.unfollowUser = {
+    auth: 'jwt',
+    handler: (request, reply) => {
+
+        let user_id = request.auth.credentials.user_id;
+        let unfollowed_user_id = request.params.user_id;
+        
+        User.findById(user_id, (err, user) => {
+
+            if (err) {
+                return reply(Boom.internal('Error retrieving user'));
+            }
+
+            user.following.pull({_id: unfollowed_user_id});
+
+            User.findById(unfollowed_user_id, (err, unfollowed_user) => {
+
+                if (err) {
+                    return reply(Boom.badRequest());
+                } 
+
+                unfollowed_user.followers.pull({_id: user_id});
+
+                user.save();
+                unfollowed_user.save();
+
+                return reply({message:'success'});
+            });
+        });
+    }
+};
+
 
 // [DELETE] /api/users/delete
 exports.delete = {

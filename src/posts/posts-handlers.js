@@ -4,10 +4,10 @@
 const Boom = require('boom');
 const Joi  = require('joi');
 
-const Group   = require('../groups/groups-model');
-const Page    = require('../pages/pages-model');
-const Post    = require('./posts-model');
-const Profile = require('../profiles/profiles-model');
+const Group = require('../groups/groups-model');
+const Page  = require('../pages/pages-model');
+const Post  = require('./posts-model');
+const User  = require('../users/users-model');
 
 
 // [POST] /api/posts
@@ -22,9 +22,9 @@ exports.createPost = {
     },
     handler: (request, reply) => {
 
-        let profile_id = request.auth.credentials.profile_id;
+        const user_id = request.auth.credentials.user_id;
 
-        Profile.findById(profile_id, (err, profile) => {
+        User.findById(user_id, (err, user) => {
 
             if (err) {
 
@@ -45,9 +45,9 @@ exports.createPost = {
                 if (err) {
                     return reply(Boom.badRequest());
                 }
-                // update profile's posts
-                profile.posts.push(post._id);
-                profile.save();    
+                // update user's posts
+                user.posts.push(post._id);
+                user.save();    
                 return reply({message: 'success'});
             }); 
         });
@@ -60,34 +60,34 @@ exports.getPosts = {
     auth: 'jwt',
     handler: (request, reply) => {
         
-        let profile_id = request.auth.credentials.profile_id;
+        const user_id = request.auth.credentials.user_id;
 
-        Profile.findById(profile_id)
+        User.findById(user_id)
             .populate({path: 'posts', options: { sort: { 'create_date': -1 } }})
-            .exec(function (err, profile) {
+            .exec(function (err, user) {
                 if (err) {
                     return reply(Boom.badRequest());
                 }
-                return reply(profile);
+                return reply(user);
             });
     }
 };
 
 
-// [GET] /api/posts/{profile_id}
-exports.getProfilePosts = {
+// [GET] /api/posts/{user_id}
+exports.getUserPosts = {
     auth: 'jwt',
     handler: (request, reply) => {
 
-        let profile_id = request.params.profile_id;
+        const user_id = request.params.user_id;
 
-        Profile.findById(profile_id)
+        User.findById(user_id)
             .populate('posts')
-            .exec(function (err, profile) {
+            .exec(function (err, user) {
                 if (err) {
                     return reply(Boom.badRequest());
                 }
-                return reply(profile.posts);
+                return reply(user.posts);
             });
     }
 };
@@ -98,7 +98,7 @@ exports.getPost = {
     auth: 'jwt',
     handler: (request, reply) => { 
 
-        let post_id = request.params.post_id;
+        const post_id = request.params.post_id;
 
         Post.findById(post_id, (err, post) => {
             if (err) {
@@ -122,8 +122,8 @@ exports.updatePost = {
     },
     handler: (request, reply) => { 
 
-        let post_id = request.params.post_id;
-        let update = {
+        const post_id = request.params.post_id;
+        const update = {
             subject: request.payload.subject,
             story: request.payload.story,
             prayer: request.payload.prayer
@@ -144,16 +144,16 @@ exports.deletePost = {
     auth: 'jwt',
     handler: (request, reply) => { 
 
-        let profile_id = request.auth.credentials.profile_id;
-        let post_id = request.params.post_id;
+        const user_id = request.auth.credentials.user_id;
+        const post_id = request.params.post_id;
 
-        // find profile and delete reference to post 
-        Profile.findById(profile_id, 'posts', (err, profile) => {
+        // find user and delete reference to post 
+        User.findById(user_id, 'posts', (err, user) => {
             if (err) {
                 return reply(Boom.badRequest());
             }
-            profile.posts.pull({_id: post_id});
-            profile.save();
+            user.posts.pull({_id: post_id});
+            user.save();
 
             // find post and delete post
             Post.findByIdAndRemove(post_id, (err, post) => {
@@ -179,12 +179,12 @@ exports.createPagePost = {
     },
     handler: (request, reply) => {
         
-        let profile_id = request.auth.credentials.profile_id;
-        let page_id = request.params.page_id;
+        const user_id = request.auth.credentials.user_id;
+        const page_id = request.params.page_id;
 
-        Profile.findById(profile_id, (err, profile) => {
+        User.findById(user_id, (err, user) => {
 
-            let authorName = profile.name;
+            let authorName = user.name;
 
             if (err) {
 
@@ -213,7 +213,7 @@ exports.createPagePost = {
                         return reply(Boom.badRequest());
                     }
 
-                    // update profile's posts
+                    // update user's posts
                     page.posts.push(post);
                     page.save();    
                     return reply({message: 'success'});
@@ -236,12 +236,12 @@ exports.createGroupPost = {
     },
     handler: (request, reply) => {
         
-        let profile_id = request.auth.credentials.profile_id;
+        let user_id = request.auth.credentials.user_id;
         let group_id = request.params.page_id;
 
-        Profile.findById(profile_id, (err, profile) => {
+        User.findById(user_id, (err, user) => {
 
-            let authorName = profile.name;
+            const authorName = user.name;
 
             if (err) {
 
@@ -270,7 +270,7 @@ exports.createGroupPost = {
                         return reply(Boom.badRequest());
                     }
 
-                    // update profile's posts
+                    // update user's posts
                     group.posts.push(post);
                     group.save();    
                     return reply({message: 'success'});

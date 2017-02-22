@@ -18,10 +18,20 @@ const Schema = new Mongoose.Schema({
         type: Boolean,
         default: false
     },  
-    profile: { 
-        type: Mongoose.Schema.ObjectId, 
-        ref : 'Profile',
+    name: {
+        type: String,
         required: true
+    },
+    bio: { 
+        type: String
+    },
+    posts: {
+        type: [{ type: Mongoose.Schema.ObjectId, ref: 'Post' }],
+        default: []
+    },
+    followers: {
+        type: [{ type: Mongoose.Schema.ObjectId, ref: 'Profile' }],
+        default: []
     },
     following: {
         type: [{ type: Mongoose.Schema.ObjectId, ref: 'Profile' }],

@@ -14,8 +14,8 @@ module.exports = [{
     config: Posts.getPosts,
 }, {
     method: 'GET',
-    path: '/api/posts/users/{profile_id}',
-    config: Posts.getProfilePosts,
+    path: '/api/posts/users/{user_id}',
+    config: Posts.getUserPosts,
 }, {
     method: 'GET',
     path: '/api/posts/{post_id}',
