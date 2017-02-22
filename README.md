@@ -26,7 +26,7 @@ MAIL_PASSWORD
 
 
 ## deployment
-1. Run `docker build -t prayforhana/nginx:{version_number} .`
-2. Run `docker push prayforhana/nginx` 
+1. Run `docker build -t prayforhana/node:{version_number} .`
+2. Run `docker push prayforhana/node` 
 3. Create a new revision of task definition in aws ecs management console
 4. Update cluster service in aws ecs management console
