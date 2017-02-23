@@ -23,6 +23,7 @@ MAIL_PASSWORD
 1. Run `npm install` to install server dependencies
 2. Run `mongod` in a separate shell to keep an instance of the mongodb daemon running
 3. Run `node index`
+4. Run `eslint src config` to lint code 
 
 
 ## deployment
