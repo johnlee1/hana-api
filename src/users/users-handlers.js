@@ -53,20 +53,11 @@ exports.confirm = {
                             if (err) {
                                 return reply(Boom.internal());
                             } else {
-
-                                user.findById(decoded.user_id, (err, user) => {
-
-                                    if (err) {
-                                        return reply(Boom.internal());  
-                                    } else {
-                                        let tokenData = {
-                                            user_id: user._id,
-                                            user_id: user._id
-                                        };
-                                        let token = Jwt.sign(tokenData, _privateKey);
-                                        return reply({message: 'success', token: token});
-                                    }
-                                });
+                                let tokenData = {
+                                    user_id: user._id,
+                                };
+                                let token = Jwt.sign(tokenData, _privateKey);
+                                return reply({message: 'success', token: token});
                             }
                         });
                     }

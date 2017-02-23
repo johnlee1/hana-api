@@ -30,11 +30,11 @@ const Schema = new Mongoose.Schema({
         default: []
     },
     followers: {
-        type: [{ type: Mongoose.Schema.ObjectId, ref: 'Profile' }],
+        type: [{ type: Mongoose.Schema.ObjectId, ref: 'User' }],
         default: []
     },
     following: {
-        type: [{ type: Mongoose.Schema.ObjectId, ref: 'Profile' }],
+        type: [{ type: Mongoose.Schema.ObjectId, ref: 'User' }],
         default: []
     },
     adminPages: {
