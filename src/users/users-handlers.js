@@ -16,8 +16,7 @@ const _privateKey = process.env.JWT_PRIVATE_KEY;
 // [GET] /api/test
 exports.test = {
     handler: (request,reply) => {
-        console.log('noway');
-        return reply('ecs updated!! :)');
+        return reply('cc :)');
     }
 };
 
@@ -75,7 +74,7 @@ exports.followers = {
     auth: 'jwt',
     handler: (request, reply) => {
 
-        let user_id = request.auth.credentials.user_id;
+        const user_id = request.auth.credentials.user_id;
 
         User.findById(user_id)
             .populate('followers', '-password')
@@ -94,7 +93,7 @@ exports.following = {
     auth: 'jwt',
     handler: (request, reply) => {
 
-        let user_id = request.auth.credentials.user_id;
+        const user_id = request.auth.credentials.user_id;
 
         User.findById(user_id)
             .populate('following', '-password')
@@ -113,7 +112,7 @@ exports.getMe = {
     auth: 'jwt',
     handler: (request, reply) => {
 
-        let user_id = request.auth.credentials.user_id;
+        const user_id = request.auth.credentials.user_id;
 
         User.findById(user_id, (err, user) => {
             if (err) {
@@ -131,16 +130,19 @@ exports.searchUsers = {
     auth: 'jwt',
     handler: (request, reply) => {
         
-        let user_id = request.auth.credentials.user_id;
-        
-        User.find({name: new RegExp(request.query.q,'i'), _id: { $ne: user_id }}, function(err, users) {
-            if(err) {
-                return reply(Boom.badRequest());
-            }
-            else {
-                return reply(users);
-            }
-        });
+        const user_id = request.auth.credentials.user_id;
+
+        const regexQuery = '^.*( |\\b)'+request.query.q+'( |\\b).*$';
+        User.find({name: new RegExp(regexQuery, 'i'), _id: { $ne: user_id }})
+            .select('-adminGroups -memberGroups -adminPages -memberPages -following -followers -posts -email -isVerified')
+            .exec(function(err, users) {
+                if(err) {
+                    return reply(Boom.badRequest());
+                }
+                else {
+                    return reply(users);
+                }
+            });
     }
 };
 
@@ -188,9 +190,9 @@ exports.register = {
     },
     handler: (request, reply) => {
 
-        let name = request.payload.name;
-        let email = request.payload.email;
-        let password = request.payload.password;
+        const name = request.payload.name;
+        const email = request.payload.email;
+        const password = request.payload.password;
 
         Bcrypt.genSalt(10, (err, salt) => {
             if (err) {
@@ -239,8 +241,8 @@ exports.login = {
     },
     handler: (request, reply) => {
         
-        let email = request.payload.email;
-        let password = request.payload.password;
+        const email = request.payload.email;
+        const password = request.payload.password;
 
         User.findOne({email: email}, (err, user) => {
             if (err) {
@@ -282,15 +284,15 @@ exports.updatePassword = {
     },
     handler: (request, reply) => {
         
-        let oldPassword = request.payload.oldPassword;
-        let newPassword = request.payload.newPassword;
-        let confirmNewPassword = request.payload.confirmNewPassword;
+        const oldPassword = request.payload.oldPassword;
+        const newPassword = request.payload.newPassword;
+        const confirmNewPassword = request.payload.confirmNewPassword;
 
         if (newPassword != confirmNewPassword) {
             return reply(Boom.badRequest('Bad credentials'));
         } else {
 
-            let user_id = request.auth.credentials.user_id;
+            const user_id = request.auth.credentials.user_id;
 
             User.findById(user_id, (err, user) => {
                 if (err) {
@@ -341,8 +343,8 @@ exports.followUser = {
     auth: 'jwt',
     handler: (request, reply) => {
 
-        let user_id = request.auth.credentials.user_id;
-        let followed_user_id = request.params.user_id;
+        const user_id = request.auth.credentials.user_id;
+        const followed_user_id = request.params.user_id;
         
         User.findById(user_id, (err, user) => {
 
@@ -381,9 +383,9 @@ exports.updateMe = {
     },
     handler: (request, reply) => {
 
-        let user_id = request.auth.credentials.user_id;
+        const user_id = request.auth.credentials.user_id;
 
-        let update = {
+        const update = {
             name: request.payload.name,
             bio: request.payload.bio
         };
@@ -403,8 +405,8 @@ exports.unfollowUser = {
     auth: 'jwt',
     handler: (request, reply) => {
 
-        let user_id = request.auth.credentials.user_id;
-        let unfollowed_user_id = request.params.user_id;
+        const user_id = request.auth.credentials.user_id;
+        const unfollowed_user_id = request.params.user_id;
         
         User.findById(user_id, (err, user) => {
 

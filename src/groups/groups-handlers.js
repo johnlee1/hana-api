@@ -105,7 +105,6 @@ exports.updateGroup = {
     auth: 'jwt',
     handler: (request, reply) => { 
 
-        let user_id = request.auth.credentials.user_id;
         let group_id = request.params.group_id;
 
         Group.findById(group_id, (err, group) => {

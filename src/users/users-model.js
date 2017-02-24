@@ -12,7 +12,8 @@ const Schema = new Mongoose.Schema({
     },
     password: {
         type: String, 
-        required: true
+        required: true,
+        select: false
     },
     isVerified: {
         type: Boolean,

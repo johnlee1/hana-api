@@ -156,7 +156,7 @@ exports.deletePost = {
             user.save();
 
             // find post and delete post
-            Post.findByIdAndRemove(post_id, (err, post) => {
+            Post.findByIdAndRemove(post_id, (err) => {
                 if (err) {
                     return reply(Boom.badRequest());
                 }

@@ -13,7 +13,7 @@ services:
       - "3000:3000"
 
   nginx:
-    image: prayforhana/test3:0.1
+    image: prayforhana/nginx:0.1.1
     links:
       - nodejs:nodejs
     ports:
