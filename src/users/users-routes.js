@@ -38,6 +38,10 @@ module.exports = [{
     config: Users.register,
 }, {
     method: 'POST',
+    path: '/api/users/emailLogin',
+    config: Users.emailLogin,
+}, {
+    method: 'POST',
     path: '/api/users/login',
     config: Users.login,
 }, {
