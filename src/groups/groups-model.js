@@ -17,8 +17,6 @@ const Schema = new Mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    admins: 
-        [{ type : Mongoose.Schema.ObjectId, ref : 'User' }],
     members: 
         [{ type : Mongoose.Schema.ObjectId, ref : 'User' }],
     posts: 

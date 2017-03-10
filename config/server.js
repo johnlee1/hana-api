@@ -15,7 +15,7 @@ const routes = require('./routes');
 const server = new Hapi.Server();
 
 server.connection({
-    host: "0.0.0.0",
+    host: '0.0.0.0',
     port: 3000,
     //routes: { cors: true },
     routes: {
@@ -23,7 +23,7 @@ server.connection({
             //origin: ['*'],
             additionalHeaders: ['hanaauthtoken']
         }
-      }    
+    }    
 });
 
 server.database = db;

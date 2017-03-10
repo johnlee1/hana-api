@@ -6,16 +6,23 @@ const Lab = require('lab');
 
 const lab = exports.lab = Lab.script();
 
+const experiment = lab.experiment;
+const test = lab.test;
 
-lab.experiment('basic arithmetic', () => {
+const server = require('../config/server');
 
-    lab.test('+ should add numbers together', (done) => {
 
-        Assert(1 + 1 === 2);
-        done();
+experiment('users', () => {
+
+    test('+ should add numbers together', (done) => {
+
+        server.inject('/api/test', (res) => {
+            Assert(res.payload === 'cc :)');
+            done();
+        })
     });
 
-    lab.test('- should subtract numbers', (done) => {
+    test('- should subtract numbers', (done) => {
 
         Assert(10 - 2 === 8);
         done();
@@ -24,9 +31,9 @@ lab.experiment('basic arithmetic', () => {
 });
 
 
-lab.experiment('modular arithmetic', () => {
+experiment('modular arithmetic', () => {
 
-    lab.test('% should perform modulus', (done) => {
+    test('% should perform modulus', (done) => {
 
         Assert((5 + 3) % 6 === 2);
         done();

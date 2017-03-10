@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "lab",
-    "lint": "eslint src"
+    "lint": "eslint src config"
   },
   "author": "",
   "license": "MIT",

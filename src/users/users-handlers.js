@@ -245,34 +245,7 @@ exports.emailLogin = {
         let token = Jwt.sign(tokenData, _privateKey);
         let templateFile = MailService.getMailTemplate('./src/mail/emailLogin.ejs');
         MailService.sendEmail('Login to Hana', templateFile, user.email, {token: token});
-
-        User.findOne({email: email})
-            .select('+password -adminGroups -memberGroups -adminPages -memberPages -following -followers -posts -email -isVerified')
-            .exec((err, user) => {
-                if (err) {
-                    return reply({error:'Incorrect Login Information'});
-                } else if (user && user.isVerified) {
-                    Bcrypt.compare(password, user.password, (err, res) => {
-                        if (err) {
-                            return reply({error:'Incorrect Login Information'});
-                        }
-                        else if (res) {
-                            let tokenData = {
-                                user_id: user._id
-                            };
-                            let token = Jwt.sign(tokenData, _privateKey);
-                            return reply({token: token});
-                        } 
-                        else {
-                            return reply({error:'Incorrect Login Information'});
-                        }
-                    });
-                } else if (user && !user.isVerified) {
-                    return reply({error:'Email Address Verification Required'});
-                } else {
-                    return reply({error:'Incorrect Login Information'});
-                }
-            });
+        return reply({success: 'maybe lol'});
     }
 };
 
@@ -291,7 +264,7 @@ exports.login = {
         const password = request.payload.password;
 
         User.findOne({email: email})
-            .select('+password -adminGroups -memberGroups -adminPages -memberPages -following -followers -posts -email -isVerified')
+            .select('+password -adminGroups -memberGroups -adminPages -memberPages -following -followers -posts -email')
             .exec((err, user) => {
                 if (err) {
                     return reply({error:'Incorrect Login Information'});

@@ -38,7 +38,8 @@ exports.createPost = {
             let post = new Post({
                 subject: subject,
                 story: story,
-                prayer: prayer
+                prayer: prayer,
+                user: user_id
             });
 
             post.save((err, post) => {
@@ -243,10 +244,8 @@ exports.createGroupPost = {
 
             const authorName = user.name;
 
-            if (err) {
-
+            if (err) 
                 return reply(Boom.internal('Error retrieving user'));
-            }
 
             // create post
             let subject = request.payload.subject;
@@ -261,19 +260,17 @@ exports.createGroupPost = {
 
             Group.findById(group_id, (err, group) => {
 
-                if (err) {
+                if (err)
                     return reply(Boom.badRequest());
-                }
 
                 post.save((err, post) => {
                     if (err) {
                         return reply(Boom.badRequest());
                     }
 
-                    // update user's posts
                     group.posts.push(post);
                     group.save();    
-                    return reply({message: 'success'});
+                    return reply({msg: 'success'});
                 });
             });
         });

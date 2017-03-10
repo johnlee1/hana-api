@@ -17,8 +17,9 @@ const Schema = new Mongoose.Schema({
         type: String,
         required: true
     },
-    author: {
-        type: String
+    user: {
+        type : Mongoose.Schema.ObjectId, 
+        ref : 'User',
     },
     create_date: {
         type: Date,

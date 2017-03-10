@@ -19,30 +19,35 @@ exports.createGroup = {
     },
     handler: (request, reply) => {
 
-        let user_id = request.auth.credentials.user_id;
+        const user_id = request.auth.credentials.user_id;
 
         User.findById(user_id, (err, user) => {
 
-            if (err) {
+            if (err)
                 return reply(Boom.internal('Error retrieving user'));
-            }
 
             // create group
-            let name = request.payload.name;
-            let description = request.payload.description;
-            let group = new Group({
+            const name = request.payload.name;
+            const description = request.payload.description;
+            const group = new Group({
                 name: name,
                 description: description,
             });
-            group.admins.push(user_id);
+            const userIds = request.payload.memberIds;
+            group.members.push.apply(group.members, userIds);
 
             group.save((err, group) => {
-                if (err) {
+                if (err)
                     return reply(Boom.badRequest());
-                }
-                // update user's admin pages
-                user.adminGroups.push(group._id);
-                user.save();    
+                group.members.map((userId => {
+                    User.findById(userId, (err, user) => {
+                        if (err) {
+                            return reply(Boom.internal('Error retrieving user'));
+                        }
+                        user.groups.push(group._id);
+                        user.save();
+                    })
+                }))    
                 return reply(group);
             }); 
         });
@@ -55,17 +60,15 @@ exports.getGroups = {
     auth: 'jwt',
     handler: (request, reply) => {
 
-        let user_id = request.auth.credentials.user_id;
+        const user_id = request.auth.credentials.user_id;
 
         User.findById(user_id)
-            .populate('adminGroups memberGroups')
+            .populate('groups')
             .exec(function (err, user) {
-                if (err) {
+                if (err)
                     return reply(Boom.badRequest());
-                }
-                let groups = {
-                    adminGroups: user.adminGroups, 
-                    memberGroups: user.memberGroups
+                const groups = {
+                    groups: user.goups, 
                 };
                 return reply(groups);
             });
@@ -78,23 +81,17 @@ exports.getGroup = {
     auth: 'jwt',
     handler: (request, reply) => { 
 
-        let user_id = request.auth.credentials.user_id;
-        let group_id = request.params.group_id;
+        const user_id = request.auth.credentials.user_id;
+        const group_id = request.params.group_id;
 
         Group.findById(group_id, (err, group) => {
 
-            if (err) {
+            if (err)
                 return reply(Boom.badRequest());
-            } 
-            else if (group.admins.indexOf(user_id) > -1) {
-                return reply({level: 'admin', group: group});
-            } 
-            else if (group.members.indexOf(user_id) > -1) {
-                return reply({level: 'members', group: group});
-            } 
-            else { 
-                return reply({level: 'notAllowed', group: group});
-            }
+            else if (group.members.indexOf(user_id) > -1)
+                return reply({msg: "member", group: group})
+            else
+                return reply({msg: "notAllowed"})
         }); 
     }
 };
@@ -105,20 +102,24 @@ exports.updateGroup = {
     auth: 'jwt',
     handler: (request, reply) => { 
 
-        let group_id = request.params.group_id;
+        const group_id = request.params.group_id;
 
         Group.findById(group_id, (err, group) => {
 
-            if (err) {
+            if (err)
                 return reply(Boom.badRequest());
-            } 
 
-            let name = request.payload.name;
-            let description = request.payload.description;
+            const name = request.payload.name;
+            const description = request.payload.description;
 
             group.name = name;
             group.description = description;
-            group.save();
+            group.save((err, group) => {
+                if (err)
+                    return reply(Boom.badRequest());
+                else
+                    return reply(group)
+            });
         });
     }
 };
@@ -129,42 +130,27 @@ exports.leaveGroup = {
     auth: 'jwt',
     handler: (request, reply) => { 
 
-        let user_id = request.auth.credentials.user_id;
-        let group_id = request.params.group_id;
+        const user_id = request.auth.credentials.user_id;
+        const group_id = request.params.group_id;
 
         User.findById(user_id, (err, user) => {
 
-            if (err) {
+            if (err)
                 return reply(Boom.internal('Error retrieving user'));
-            }
 
-            let adminIndex = user.adminGroups.indexOf(user_id);
-            let memberIndex = user.memberGroups.indexOf(group_id);
+            const memberIndex = user.groups.indexOf(group_id);
 
             // remove group reference from user
-            if (adminIndex > -1) {
-                user.adminGroups.splice(adminIndex, 1);
-            } 
-            if (memberIndex > -1) {
-                user.memberGroups.splice(memberIndex, 1);
-            } 
+            if (memberIndex > -1)
+                user.groups.splice(memberIndex, 1);
 
             Group.findById(group_id, (err, group) => {
 
-                if (err) {
+                if (err)
                     return reply(Boom.badRequest());
-                } 
 
-                let adminIndex = group.admins.indexOf(user_id);
-                let memberIndex = group.members.indexOf(user_id);
-
-                // remove user reference from group
-                if (adminIndex > -1) {
-                    group.admins.splice(adminIndex, 1);
-                } 
-                if (memberIndex > -1) {
-                    group.members.splice(memberIndex, 1);
-                } 
+                const memberIndex = group.members.indexOf(user_id);
+                group.members.splice(memberIndex, 1);
 
                 user.save();
                 group.save();

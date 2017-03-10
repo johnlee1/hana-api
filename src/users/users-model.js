@@ -46,11 +46,7 @@ const Schema = new Mongoose.Schema({
         type: [{ type: Mongoose.Schema.ObjectId, ref: 'Page' }],
         default: []
     },
-    adminGroups: {
-        type: [{ type: Mongoose.Schema.ObjectId, ref: 'Group' }],
-        default: []
-    },
-    memberGroups: {
+    groups: {
         type: [{ type: Mongoose.Schema.ObjectId, ref: 'Group' }],
         default: []
     }
