@@ -4,8 +4,9 @@
   "description": "prayer app server",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint src",
     "test": "lab",
-    "lint": "eslint src config"
+    "build": "npm run lint && npm run test && . ./dockerize.sh"
   },
   "author": "",
   "license": "MIT",

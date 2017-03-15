@@ -231,25 +231,6 @@ exports.register = {
 };
 
 
-// [POST] /api/users/emailLogin
-exports.emailLogin = {
-    validate: {
-        payload: {
-            email: Joi.string().email().required(),
-        }
-    },
-    handler: (request, reply) => {
-        
-        const email = request.payload.email;
-        let tokenData = { user_id: user._id };
-        let token = Jwt.sign(tokenData, _privateKey);
-        let templateFile = MailService.getMailTemplate('./src/mail/emailLogin.ejs');
-        MailService.sendEmail('Login to Hana', templateFile, user.email, {token: token});
-        return reply({success: 'maybe lol'});
-    }
-};
-
-
 // [POST] /api/users/login
 exports.login = {
     validate: {
@@ -332,8 +313,7 @@ exports.updatePassword = {
                                             return reply(Boom.internal());
                                         } else {
                                             user.password = hash;
-                                            user.save((err, user) => {
-
+                                            user.save((err) => {
                                                 if (!err) {
                                                     return reply({success:'success'});
                                                 } else {
@@ -411,7 +391,7 @@ exports.updateMe = {
             bio: request.payload.bio
         };
 
-        User.findByIdAndUpdate(user_id, {$set:update}, (err, user) => {
+        User.findByIdAndUpdate(user_id, {$set:update}, (err) => {
             if (err) {
                 return reply(Boom.badRequest());
             }

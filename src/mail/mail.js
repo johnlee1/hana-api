@@ -33,7 +33,7 @@ exports.sendEmail = (subject, templateFile, email, datas) => {
         html: template(datas)
     };
 
-    transporter.sendMail(mailOptions, (err, res) => {
+    transporter.sendMail(mailOptions, (err) => {
         if (err) {
             throw err;
         }   

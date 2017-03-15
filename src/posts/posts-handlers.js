@@ -243,7 +243,7 @@ exports.updatePost = {
             prayer: request.payload.prayer
         };
 
-        Post.findByIdAndUpdate(post_id, {$set:update}, (err, post) => {
+        Post.findByIdAndUpdate(post_id, {$set:update}, (err) => {
             if (err) {
                 return reply(Boom.badRequest());
             }

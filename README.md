@@ -27,7 +27,6 @@ MAIL_PASSWORD
 
 
 ## deployment
-1. Run `docker build -t prayforhana/node:{version_number} .` to create a new image
-2. Run `docker push prayforhana/node` to push image to dockerhub
-3. Create a new revision of task definition in aws ecs management console
-4. Update cluster service in aws ecs management console
+1. Run `npm run build (version_number)`
+2. Create a new revision of task definition in aws ecs management console
+3. Update cluster service in aws ecs management console

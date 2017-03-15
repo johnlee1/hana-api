@@ -5,21 +5,16 @@ const Assert = require('assert');
 const Lab = require('lab');
 
 const lab = exports.lab = Lab.script();
-
 const experiment = lab.experiment;
 const test = lab.test;
-
-const server = require('../config/server');
 
 
 experiment('users', () => {
 
     test('+ should add numbers together', (done) => {
 
-        server.inject('/api/test', (res) => {
-            Assert(res.payload === 'cc :)');
-            done();
-        })
+        Assert(7 + 2 === 9);
+        done();
     });
 
     test('- should subtract numbers', (done) => {

@@ -19,38 +19,30 @@ exports.createGroup = {
     },
     handler: (request, reply) => {
 
-        const user_id = request.auth.credentials.user_id;
-
-        User.findById(user_id, (err, user) => {
-
-            if (err)
-                return reply(Boom.internal('Error retrieving user'));
-
-            // create group
-            const name = request.payload.name;
-            const description = request.payload.description;
-            const group = new Group({
-                name: name,
-                description: description,
-            });
-            const userIds = request.payload.memberIds;
-            group.members.push.apply(group.members, userIds);
-
-            group.save((err, group) => {
-                if (err)
-                    return reply(Boom.badRequest());
-                group.members.map((userId => {
-                    User.findById(userId, (err, user) => {
-                        if (err) {
-                            return reply(Boom.internal('Error retrieving user'));
-                        }
-                        user.groups.push(group._id);
-                        user.save();
-                    })
-                }))    
-                return reply(group);
-            }); 
+        // create group
+        const name = request.payload.name;
+        const description = request.payload.description;
+        const group = new Group({
+            name: name,
+            description: description,
         });
+        const userIds = request.payload.memberIds;
+        group.members.push.apply(group.members, userIds);
+
+        group.save((err, group) => {
+            if (err)
+                return reply(Boom.badRequest());
+            group.members.map((userId => {
+                User.findById(userId, (err, user) => {
+                    if (err) {
+                        return reply(Boom.internal('Error retrieving user'));
+                    }
+                    user.groups.push(group._id);
+                    user.save();
+                });
+            }));
+            return reply(group);
+        }); 
     }
 };
 
@@ -89,9 +81,9 @@ exports.getGroup = {
             if (err)
                 return reply(Boom.badRequest());
             else if (group.members.indexOf(user_id) > -1)
-                return reply({msg: "member", group: group})
+                return reply({msg: 'member', group: group});
             else
-                return reply({msg: "notAllowed"})
+                return reply({msg: 'notAllowed'});
         }); 
     }
 };
@@ -118,7 +110,7 @@ exports.updateGroup = {
                 if (err)
                     return reply(Boom.badRequest());
                 else
-                    return reply(group)
+                    return reply(group);
             });
         });
     }

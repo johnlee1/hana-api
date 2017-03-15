@@ -209,7 +209,7 @@ exports.updatePage = {
             } else if (admins.includes(user_id)) {
                 page.name = request.payload.name;
                 page.description = request.payload.description;
-                page.save((err, page) => {
+                page.save((err) => {
                     if (err) {
                         return reply(Boom.badRequest());
                     } else {
