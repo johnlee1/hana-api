@@ -10,52 +10,6 @@ const Post  = require('./posts-model');
 const User  = require('../users/users-model');
 
 
-// [POST] /api/posts
-exports.createPost = {   
-    auth: 'jwt',
-    validate: {
-        payload: {
-            subject: Joi.string().required(),
-            story: Joi.string().required(),
-            prayer: Joi.string().required()
-        }
-    },
-    handler: (request, reply) => {
-
-        const user_id = request.auth.credentials.user_id;
-
-        User.findById(user_id, (err, user) => {
-
-            if (err) {
-
-                return reply(Boom.internal('Error retrieving user'));
-            }
-
-            // create post
-            let subject = request.payload.subject;
-            let story = request.payload.story;
-            let prayer = request.payload.prayer;
-            let post = new Post({
-                subject: subject,
-                story: story,
-                prayer: prayer,
-                user: user_id
-            });
-
-            post.save((err, post) => {
-                if (err) {
-                    return reply(Boom.badRequest());
-                }
-                // update user's posts
-                user.posts.push(post._id);
-                user.save();    
-                return reply({message: 'success'});
-            }); 
-        });
-    }
-};
-
-
 // [GET] /api/posts/me
 exports.getPosts = {
     auth: 'jwt',
@@ -111,8 +65,57 @@ exports.getPost = {
 };
 
 
-// [PUT] /api/posts/{post_id}
-exports.updatePost = {
+// [POST] /api/posts
+exports.createPost = {   
+    auth: 'jwt',
+    validate: {
+        payload: {
+            subject: Joi.string().required(),
+            story: Joi.string().required(),
+            prayer: Joi.string().required(),
+            private: Joi.boolean().required()
+        }
+    },
+    handler: (request, reply) => {
+
+        const user_id = request.auth.credentials.user_id;
+
+        User.findById(user_id, (err, user) => {
+
+            if (err) {
+
+                return reply(Boom.internal('Error retrieving user'));
+            }
+
+            // create post
+            const subject = request.payload.subject;
+            const story = request.payload.story;
+            const prayer = request.payload.prayer;
+            const privat = request.payload.private;
+            const post = new Post({
+                subject: subject,
+                story: story,
+                prayer: prayer,
+                user: user_id,
+                private: privat
+            });
+
+            post.save((err, post) => {
+                if (err) {
+                    return reply(Boom.badRequest());
+                }
+                // update user's posts
+                user.posts.push(post._id);
+                user.save();    
+                return reply({message: 'success'});
+            }); 
+        });
+    }
+};
+
+
+// [POST] /api/posts/group/{group_id}
+exports.createGroupPost = {   
     auth: 'jwt',
     validate: {
         payload: {
@@ -121,47 +124,43 @@ exports.updatePost = {
             prayer: Joi.string().required()
         }
     },
-    handler: (request, reply) => { 
+    handler: (request, reply) => {
+        
+        let user_id = request.auth.credentials.user_id;
+        let group_id = request.params.page_id;
 
-        const post_id = request.params.post_id;
-        const update = {
-            subject: request.payload.subject,
-            story: request.payload.story,
-            prayer: request.payload.prayer
-        };
+        User.findById(user_id, (err, user) => {
 
-        Post.findByIdAndUpdate(post_id, {$set:update}, (err, post) => {
-            if (err) {
-                return reply(Boom.badRequest());
-            }
-            return reply({message: 'success'});
-        });
-    }
-};
+            const authorName = user.name;
 
+            if (err) 
+                return reply(Boom.internal('Error retrieving user'));
 
-// [DELETE] /api/posts/{post_id}
-exports.deletePost = {
-    auth: 'jwt',
-    handler: (request, reply) => { 
+            // create post
+            let subject = request.payload.subject;
+            let story = request.payload.story;
+            let prayer = request.payload.prayer;
+            let post = new Post({
+                subject: subject,
+                story: story,
+                prayer: prayer,
+                author: authorName
+            });
 
-        const user_id = request.auth.credentials.user_id;
-        const post_id = request.params.post_id;
+            Group.findById(group_id, (err, group) => {
 
-        // find user and delete reference to post 
-        User.findById(user_id, 'posts', (err, user) => {
-            if (err) {
-                return reply(Boom.badRequest());
-            }
-            user.posts.pull({_id: post_id});
-            user.save();
-
-            // find post and delete post
-            Post.findByIdAndRemove(post_id, (err) => {
-                if (err) {
+                if (err)
                     return reply(Boom.badRequest());
-                }
-                return reply({message: 'success'});
+
+                post.save((err, post) => {
+                    if (err) {
+                        return reply(Boom.badRequest());
+                    }
+
+                    group.posts.push(post);
+                    group.save();    
+                    return reply({msg: 'success'});
+                });
             });
         });
     }
@@ -225,8 +224,8 @@ exports.createPagePost = {
 };
 
 
-// [POST] /api/posts/group/{group_id}
-exports.createGroupPost = {   
+// [PUT] /api/posts/{post_id}
+exports.updatePost = {
     auth: 'jwt',
     validate: {
         payload: {
@@ -235,43 +234,47 @@ exports.createGroupPost = {
             prayer: Joi.string().required()
         }
     },
-    handler: (request, reply) => {
-        
-        let user_id = request.auth.credentials.user_id;
-        let group_id = request.params.page_id;
+    handler: (request, reply) => { 
 
-        User.findById(user_id, (err, user) => {
+        const post_id = request.params.post_id;
+        const update = {
+            subject: request.payload.subject,
+            story: request.payload.story,
+            prayer: request.payload.prayer
+        };
 
-            const authorName = user.name;
+        Post.findByIdAndUpdate(post_id, {$set:update}, (err, post) => {
+            if (err) {
+                return reply(Boom.badRequest());
+            }
+            return reply({message: 'success'});
+        });
+    }
+};
 
-            if (err) 
-                return reply(Boom.internal('Error retrieving user'));
 
-            // create post
-            let subject = request.payload.subject;
-            let story = request.payload.story;
-            let prayer = request.payload.prayer;
-            let post = new Post({
-                subject: subject,
-                story: story,
-                prayer: prayer,
-                author: authorName
-            });
+// [DELETE] /api/posts/{post_id}
+exports.deletePost = {
+    auth: 'jwt',
+    handler: (request, reply) => { 
 
-            Group.findById(group_id, (err, group) => {
+        const user_id = request.auth.credentials.user_id;
+        const post_id = request.params.post_id;
 
-                if (err)
+        // find user and delete reference to post 
+        User.findById(user_id, 'posts', (err, user) => {
+            if (err) {
+                return reply(Boom.badRequest());
+            }
+            user.posts.pull({_id: post_id});
+            user.save();
+
+            // find post and delete post
+            Post.findByIdAndRemove(post_id, (err) => {
+                if (err) {
                     return reply(Boom.badRequest());
-
-                post.save((err, post) => {
-                    if (err) {
-                        return reply(Boom.badRequest());
-                    }
-
-                    group.posts.push(post);
-                    group.save();    
-                    return reply({msg: 'success'});
-                });
+                }
+                return reply({message: 'success'});
             });
         });
     }

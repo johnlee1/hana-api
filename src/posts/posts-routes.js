@@ -5,10 +5,6 @@ const Posts = require('./posts-handlers');
 
 
 module.exports = [{
-    method: 'POST',
-    path: '/api/posts',
-    config: Posts.createPost,
-}, {
     method: 'GET',
     path: '/api/posts/me',
     config: Posts.getPosts,
@@ -21,6 +17,18 @@ module.exports = [{
     path: '/api/posts/{post_id}',
     config: Posts.getPost,
 }, {
+    method: 'POST',
+    path: '/api/posts',
+    config: Posts.createPost,
+}, {
+    method: 'POST',
+    path: '/api/posts/group/{group_id}',
+    config: Posts.createGroupPost,
+}, {
+    method: 'POST',
+    path: '/api/posts/pages/{page_id}',
+    config: Posts.createPagePost,
+}, {
     method: 'PUT',
     path: '/api/posts/{post_id}',
     config: Posts.updatePost,
@@ -28,12 +36,4 @@ module.exports = [{
     method: 'DELETE',
     path: '/api/posts/{post_id}',
     config: Posts.deletePost,
-}, {
-    method: 'POST',
-    path: '/api/posts/pages/{page_id}',
-    config: Posts.createPagePost,
-}, {
-    method: 'POST',
-    path: '/api/posts/group/{group_id}',
-    config: Posts.createGroupPost,
 }];

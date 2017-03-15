@@ -185,7 +185,7 @@ exports.register = {
         payload: {
             name: Joi.string().min(1).max(30).required(),
             email: Joi.string().email().required(),
-            password: Joi.string().min(8).max(80).required()
+            password: Joi.string().min(1).max(80).required()
         }
     },
     handler: (request, reply) => {
