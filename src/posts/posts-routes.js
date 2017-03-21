@@ -21,14 +21,6 @@ module.exports = [{
     path: '/api/posts',
     config: Posts.createPost,
 }, {
-    method: 'POST',
-    path: '/api/posts/group/{group_id}',
-    config: Posts.createGroupPost,
-}, {
-    method: 'POST',
-    path: '/api/posts/pages/{page_id}',
-    config: Posts.createPagePost,
-}, {
     method: 'PUT',
     path: '/api/posts/{post_id}',
     config: Posts.updatePost,

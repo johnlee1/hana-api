@@ -134,7 +134,7 @@ exports.searchUsers = {
 
         const regexQuery = '^.*( |\\b)'+request.query.q+'( |\\b).*$';
         User.find({name: new RegExp(regexQuery, 'i'), _id: { $ne: user_id }})
-            .select('-adminGroups -memberGroups -adminPages -memberPages -following -followers -posts -email -isVerified')
+            .select('-groups -adminPages -memberPages -following -followers -posts -email -isVerified')
             .exec(function(err, users) {
                 if(err) {
                     return reply(Boom.badRequest());

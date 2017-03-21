@@ -55,7 +55,7 @@ exports.getGroups = {
         const user_id = request.auth.credentials.user_id;
 
         User.findById(user_id)
-            .populate('groups')
+            .populate('groups', '-posts -members')
             .exec(function (err, user) {
                 if (err)
                     return reply(Boom.badRequest());
