@@ -72,10 +72,14 @@ exports.createPost = {
         payload: {
             id: Joi.string().required(),
             prayer: Joi.string().required(),
-            private: Joi.boolean().required(),
+            private: Joi.boolean(),
+            public: Joi.boolean(),
+            resolution: Joi.string(),
+            resolved: Joi.boolean().required(),
             story: Joi.string().required(),
             subject: Joi.string().required(),
             type: Joi.string().required(),
+            urgent: Joi.boolean().required(),
         }
     },
     handler: (request, reply) => {
@@ -83,6 +87,9 @@ exports.createPost = {
         const id = request.payload.id;
         const type = request.payload.type;
         const user_id = request.auth.credentials.user_id;
+
+        console.log(request.payload.public);
+        console.log(request.payload.private);
 
         User.findById(user_id, (err, user) => {
 
@@ -92,6 +99,7 @@ exports.createPost = {
                 subject: request.payload.subject,
                 story: request.payload.story,
                 prayer: request.payload.prayer,
+                private: request.payload.private
             });
 
             switch(type) {

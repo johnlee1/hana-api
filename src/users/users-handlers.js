@@ -132,7 +132,8 @@ exports.searchUsers = {
         
         const user_id = request.auth.credentials.user_id;
 
-        const regexQuery = '^.*( |\\b)'+request.query.q+'( |\\b).*$';
+        // const regexQuery = '^.*( |\\b)'+request.query.q+'( |\\b).*$';
+        const regexQuery = request.query.q
         User.find({name: new RegExp(regexQuery, 'i'), _id: { $ne: user_id }})
             .select('-groups -adminPages -memberPages -following -followers -posts -email -isVerified')
             .exec(function(err, users) {
