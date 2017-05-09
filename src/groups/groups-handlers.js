@@ -8,26 +8,30 @@ const Group = require('./groups-model');
 const User = require('../users/users-model');
 
 
-// [POST] api/groups
-exports.createGroup = {   
+// [POST] api/circles
+exports.createCircle = {   
     auth: 'jwt',
     validate: {
         payload: {
             name: Joi.string().required(),
-            description: Joi.string().required()
+            description: Joi.string().required(),
+            members: Joi.array().required(),
         }
     },
     handler: (request, reply) => {
 
-        // create group
+        const user_id = request.auth.credentials.user_id;
+
         const name = request.payload.name;
         const description = request.payload.description;
+        let members = request.payload.members;
+        members.push(user_id);
+        console.log(members);
         const group = new Group({
             name: name,
             description: description,
+            members: members,
         });
-        const userIds = request.payload.memberIds;
-        group.members.push.apply(group.members, userIds);
 
         group.save((err, group) => {
             if (err)
@@ -59,29 +63,31 @@ exports.getGroups = {
             .exec(function (err, user) {
                 if (err)
                     return reply(Boom.badRequest());
-                const groups = {
-                    groups: user.goups, 
+                const circles = {
+                    circles: user.groups, 
                 };
-                return reply(groups);
+                return reply(circles);
             });
     }
 };
 
 
-// [GET] /api/groups/{group_id}
-exports.getGroup = {
+// [GET] /api/circles/{circle_id}
+exports.getCircle = {
     auth: 'jwt',
     handler: (request, reply) => { 
 
         const user_id = request.auth.credentials.user_id;
-        const group_id = request.params.group_id;
+        const circle_id = request.params.circle_id;
 
-        Group.findById(group_id, (err, group) => {
+        Group.findById(circle_id)
+            .populate({path: 'posts', options: {sort: { 'create_date': -1} }})
+            .exec((err, circle) => {
 
             if (err)
                 return reply(Boom.badRequest());
-            else if (group.members.indexOf(user_id) > -1)
-                return reply({msg: 'member', group: group});
+            else if (circle.members.indexOf(user_id) > -1)
+                return reply({msg: 'member', circle: circle});
             else
                 return reply({msg: 'notAllowed'});
         }); 

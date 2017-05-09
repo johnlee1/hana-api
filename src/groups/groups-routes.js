@@ -6,16 +6,16 @@ const Groups = require('./groups-handlers');
 
 module.exports = [{
     method: 'POST',
-    path: '/api/groups/',
-    config: Groups.createGroup,
+    path: '/api/circles',
+    config: Groups.createCircle,
 }, {
     method: 'GET',
     path: '/api/groups/me',
     config: Groups.getGroups,
 }, {
     method: 'GET',
-    path: '/api/groups/{group_id}',
-    config: Groups.getGroup,
+    path: '/api/circles/{circle_id}',
+    config: Groups.getCircle,
 }, {
     method: 'PUT',
     path: '/api/groups/{group_id}',

@@ -18,8 +18,8 @@ const Schema = new Mongoose.Schema({
         required: true
     },
     user: {
-        type : Mongoose.Schema.ObjectId, 
-        ref : 'User',
+        type: Mongoose.Schema.ObjectId, 
+        ref: 'User',
     },
     create_date: {
         type: Date,

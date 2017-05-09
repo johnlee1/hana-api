@@ -88,9 +88,6 @@ exports.createPost = {
         const type = request.payload.type;
         const user_id = request.auth.credentials.user_id;
 
-        console.log(request.payload.public);
-        console.log(request.payload.private);
-
         User.findById(user_id, (err, user) => {
 
             if (err) return reply(Boom.internal('Error retrieving user'));
@@ -131,7 +128,7 @@ exports.createPost = {
                     });
                     break;
 
-                case "group":
+                case "circle":
                     Group.findById(id, (err, group) => {
 
                         if (err) return reply(Boom.badRequest());
