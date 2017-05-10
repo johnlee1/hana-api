@@ -26,7 +26,6 @@ exports.createCircle = {
         const description = request.payload.description;
         let members = request.payload.members;
         members.push(user_id);
-        console.log(members);
         const group = new Group({
             name: name,
             description: description,
@@ -83,35 +82,36 @@ exports.getCircle = {
         Group.findById(circle_id)
             .populate({path: 'posts', options: {sort: { 'create_date': -1} }})
             .exec((err, circle) => {
-
-            if (err)
-                return reply(Boom.badRequest());
-            else if (circle.members.indexOf(user_id) > -1)
-                return reply({msg: 'member', circle: circle});
-            else
-                return reply({msg: 'notAllowed'});
-        }); 
+                if (err)
+                    return reply(Boom.badRequest());
+                else if (circle.members.indexOf(user_id) > -1)
+                    return reply({msg: 'member', circle: circle});
+                else
+                    return reply({msg: 'notAllowed'});
+            }); 
     }
 };
 
 
-// [PUT] /api/groups/{group_id}
-exports.updateGroup = {
+// [PUT] /api/circles/{id}
+exports.updateCircle = {
     auth: 'jwt',
+    validate: {
+        payload: {
+            name: Joi.string().required(),
+            description: Joi.string()
+        }
+    },
     handler: (request, reply) => { 
 
-        const group_id = request.params.group_id;
+        const group_id = request.params.id;
 
         Group.findById(group_id, (err, group) => {
 
             if (err)
                 return reply(Boom.badRequest());
-
-            const name = request.payload.name;
-            const description = request.payload.description;
-
-            group.name = name;
-            group.description = description;
+            group.name = request.payload.name;
+            group.description = request.payload.description;
             group.save((err, group) => {
                 if (err)
                     return reply(Boom.badRequest());

@@ -18,8 +18,8 @@ module.exports = [{
     config: Groups.getCircle,
 }, {
     method: 'PUT',
-    path: '/api/groups/{group_id}',
-    config: Groups.updateGroup,
+    path: '/api/circles/{id}',
+    config: Groups.updateCircle,
 }, {
     method: 'PUT',
     path: '/api/groups/leave/{group_id}',
