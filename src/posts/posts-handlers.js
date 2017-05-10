@@ -101,48 +101,48 @@ exports.createPost = {
 
             switch(type) {
 
-                case "profile":
+            case 'profile':
+                post.save((err, post) => {
+
+                    if (err) return reply(Boom.badRequest());
+
+                    user.posts.push(post._id);
+                    user.save();
+                    return reply({message: 'success'});
+                });
+                break;
+
+            case 'page':
+                Page.findById(id, (err, page) => {
+
+                    if (err) return reply(Boom.badRequest());
+
                     post.save((err, post) => {
 
                         if (err) return reply(Boom.badRequest());
 
-                        user.posts.push(post._id);
-                        user.save();
+                        page.posts.push(post);
+                        page.save();
                         return reply({message: 'success'});
                     });
-                    break;
+                });
+                break;
 
-                case "page":
-                    Page.findById(id, (err, page) => {
+            case 'circle':
+                Group.findById(id, (err, group) => {
 
-                        if (err) return reply(Boom.badRequest());
+                    if (err) return reply(Boom.badRequest());
 
-                        post.save((err, post) => {
-
-                            if (err) return reply(Boom.badRequest());
-
-                            page.posts.push(post);
-                            page.save();
-                            return reply({message: 'success'});
-                        });
-                    });
-                    break;
-
-                case "circle":
-                    Group.findById(id, (err, group) => {
+                    post.save((err, post) => {
 
                         if (err) return reply(Boom.badRequest());
 
-                        post.save((err, post) => {
-
-                            if (err) return reply(Boom.badRequest());
-
-                            group.posts.push(post);
-                            group.save();
-                            return reply({msg: 'success'});
-                        });
+                        group.posts.push(post);
+                        group.save();
+                        return reply({msg: 'success'});
                     });
-                    break;
+                });
+                break;
             }
         });
     }
