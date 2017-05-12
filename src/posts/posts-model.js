@@ -35,6 +35,13 @@ const Schema = new Mongoose.Schema({
     urgent: {
         type: Boolean,
         default: false
+    },
+    resolution: {
+        type: String
+    },
+    resolved: {
+        type: Boolean,    
+        default: false
     }
 });
 

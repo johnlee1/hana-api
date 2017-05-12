@@ -260,7 +260,7 @@ exports.login = {
                                 user_id: user._id
                             };
                             let token = Jwt.sign(tokenData, _privateKey);
-                            return reply({token: token});
+                            return reply({token: token, user_id: user._id});
                         } 
                         else {
                             return reply({error:'Incorrect Login Information'});

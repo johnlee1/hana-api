@@ -79,7 +79,7 @@ exports.createPost = {
             story: Joi.string().required(),
             subject: Joi.string().required(),
             type: Joi.string().required(),
-            urgent: Joi.boolean().required(),
+            urgent: Joi.boolean(),
         }
     },
     handler: (request, reply) => {
@@ -96,7 +96,8 @@ exports.createPost = {
                 subject: request.payload.subject,
                 story: request.payload.story,
                 prayer: request.payload.prayer,
-                private: request.payload.private
+                private: request.payload.private,
+                urgent: request.payload.urgent
             });
 
             switch(type) {
@@ -121,7 +122,7 @@ exports.createPost = {
 
                         if (err) return reply(Boom.badRequest());
 
-                        page.posts.push(post);
+                        page.posts.push(post._id);
                         page.save();
                         return reply({message: 'success'});
                     });
@@ -137,7 +138,7 @@ exports.createPost = {
 
                         if (err) return reply(Boom.badRequest());
 
-                        group.posts.push(post);
+                        group.posts.push(post._id);
                         group.save();
                         return reply({msg: 'success'});
                     });
@@ -154,18 +155,27 @@ exports.updatePost = {
     auth: 'jwt',
     validate: {
         payload: {
-            subject: Joi.string().required(),
+            prayer: Joi.string().required(),
+            private: Joi.boolean().required(),
+            public: Joi.boolean(),
+            resolution: Joi.string().required(),
+            resolved: Joi.boolean().required(),
             story: Joi.string().required(),
-            prayer: Joi.string().required()
+            subject: Joi.string().required(),
+            urgent: Joi.boolean().required(),
         }
     },
     handler: (request, reply) => { 
 
         const post_id = request.params.post_id;
         const update = {
-            subject: request.payload.subject,
+            prayer: request.payload.prayer,
+            private: request.payload.private,
+            resolution: request.payload.resolution,
+            resolved: request.payload.resolved,
             story: request.payload.story,
-            prayer: request.payload.prayer
+            subject: request.payload.subject,
+            urgent: request.payload.urgent,
         };
 
         Post.findByIdAndUpdate(post_id, {$set:update}, (err) => {
