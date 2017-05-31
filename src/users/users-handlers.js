@@ -34,7 +34,7 @@ exports.confirm = {
 
         Jwt.verify(token, _privateKey, (err, decoded) => {
             if (decoded === undefined) {
-                return reply(Boom.badRequest('Invalid verification link'));
+                return reply(Boom.badRequest('Invalid verification link 1'));
             }
             const ttl = 90000000;
             const diff = Moment().diff(Moment(decoded.iat * 1000));
@@ -45,7 +45,7 @@ exports.confirm = {
                     if (err) {
                         return reply(Boom.internal());
                     } else if (!user) {
-                        return reply(Boom.badRequest('Invalid verification link'));
+                        return reply(Boom.badRequest('Invalid verification link 2'));
                     } else {
                         user.isVerified = true;
                         user.save((err) => {
@@ -56,7 +56,7 @@ exports.confirm = {
                                     user_id: user._id,
                                 };
                                 let token = Jwt.sign(tokenData, _privateKey);
-                                return reply({message: 'success', token: token});
+                                return reply({message: 'success', token: token, user_id: user._id});
                             }
                         });
                     }
@@ -218,7 +218,7 @@ exports.register = {
                         try {
                             let templateFile = MailService.getMailTemplate('./src/mail/register.ejs');
                             MailService.sendEmail('Verify your email address', templateFile, user.email, {token: token});
-                            return reply({token: token});
+                            return reply({token: token, user_id: user._id});
                         } catch (e) {
                             return reply({error:'Sign up unsuccessful. Try again later.'});
                         }         
@@ -237,7 +237,7 @@ exports.login = {
     validate: {
         payload: {
             email: Joi.string().email().required(),
-            password: Joi.string().min(8).max(80).required()
+            password: Joi.string().min(1).max(80).required()
         }
     },
     handler: (request, reply) => {
@@ -246,10 +246,10 @@ exports.login = {
         const password = request.payload.password;
 
         User.findOne({email: email})
-            .select('+password -adminGroups -memberGroups -adminPages -memberPages -following -followers -posts -email')
+            .select('+password -groups -adminPages -memberPages -following -followers -posts -email')
             .exec((err, user) => {
                 if (err) {
-                    return reply({error:'Incorrect Login Information'});
+                    return reply({error:'Incorrect Login Information (1)'});
                 } else if (user && user.isVerified) {
                     Bcrypt.compare(password, user.password, (err, res) => {
                         if (err) {
@@ -263,13 +263,13 @@ exports.login = {
                             return reply({token: token, user_id: user._id});
                         } 
                         else {
-                            return reply({error:'Incorrect Login Information'});
+                            return reply({error:'Incorrect Login Information (2)'});
                         }
                     });
                 } else if (user && !user.isVerified) {
                     return reply({error:'Email Address Verification Required'});
                 } else {
-                    return reply({error:'Incorrect Login Information'});
+                    return reply({error:'Incorrect Login Information (3)'});
                 }
             });
     }
