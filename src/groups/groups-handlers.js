@@ -25,6 +25,7 @@ exports.createCircle = {
         const name = request.payload.name;
         const description = request.payload.description;
         let members = request.payload.members;
+        members = members.map(member => member.originalObject.id);
         members.push(user_id);
         const group = new Group({
             name: name,
