@@ -3,7 +3,9 @@ version: '2'
 services: 
 
   nodejs:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile-dev
     volumes: 
       - ./src:/api/src
       - ./config:/api/config
