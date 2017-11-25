@@ -1,4 +1,4 @@
-FROM node:6.9-alpine
+FROM node:8.9-alpine
 
 # need this for bcrypt node module
 RUN apk add --no-cache make gcc g++ python
