@@ -9,6 +9,8 @@ const Moment = require('moment');
 
 const MailService = require('../mail/mail');
 const User = require('./users-model');
+const Queries = require('../queries/queries');
+
 
 const _privateKey = process.env.JWT_PRIVATE_KEY;
 
@@ -110,17 +112,13 @@ exports.following = {
 // [GET] /api/users/me
 exports.getMe = {
     auth: 'jwt',
-    handler: (request, reply) => {
+    handler: async (request, reply) => {
 
         const user_id = request.auth.credentials.user_id;
-
-        User.findById(user_id, (err, user) => {
-            if (err) {
-                return reply(Boom.badRequest());
-            } else {
-                return reply(user);
-            }
-        });
+        let user = await Queries.getUser(user_id);
+        if (user === "error")
+            return reply(Boom.badRequest());
+        return reply(user);
     }
 };
 
