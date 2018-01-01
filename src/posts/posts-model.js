@@ -1,8 +1,6 @@
 'use strict';
 
-
 const Mongoose = require('mongoose');
-
 
 const Schema = new Mongoose.Schema({
     subject: {
@@ -28,10 +26,6 @@ const Schema = new Mongoose.Schema({
     expiration_date: {
         type: Date
     },
-    private: {
-        type: Boolean,
-        default: false
-    },
     urgent: {
         type: Boolean,
         default: false
@@ -44,6 +38,5 @@ const Schema = new Mongoose.Schema({
         default: false
     }
 });
-
 
 module.exports = Mongoose.model('Post', Schema);

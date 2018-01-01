@@ -30,12 +30,8 @@ const Schema = new Mongoose.Schema({
         type: [{ type: Mongoose.Schema.ObjectId, ref: 'Post' }],
         default: []
     },
-    followers: {
-        type: [{ type: Mongoose.Schema.ObjectId, ref: 'User' }],
-        default: []
-    },
-    following: {
-        type: [{ type: Mongoose.Schema.ObjectId, ref: 'User' }],
+    lists: {
+        type: [{ type: Mongoose.Schema.ObjectId, ref: 'List' }],
         default: []
     },
     adminPages: {
@@ -46,10 +42,6 @@ const Schema = new Mongoose.Schema({
         type: [{ type: Mongoose.Schema.ObjectId, ref: 'Page' }],
         default: []
     },
-    groups: {
-        type: [{ type: Mongoose.Schema.ObjectId, ref: 'Group' }],
-        default: []
-    }
 });
 
 

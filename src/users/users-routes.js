@@ -14,14 +14,6 @@ module.exports = [{
     config: Users.confirm,
 }, {
     method: 'GET',
-    path: '/api/users/followers',
-    config: Users.followers,
-}, {
-    method: 'GET',
-    path: '/api/users/following',
-    config: Users.following,
-}, {
-    method: 'GET',
     path: '/api/users/me',
     config: Users.getMe,
 }, {
@@ -46,16 +38,8 @@ module.exports = [{
     config: Users.updatePassword,
 }, {
     method: 'PUT',
-    path: '/api/users/follow/{user_id}',
-    config: Users.followUser,
-}, {
-    method: 'PUT',
     path: '/api/users/me',
     config: Users.updateMe,
-}, {
-    method: 'PUT',
-    path: '/api/users/unfollow/{user_id}',
-    config: Users.unfollowUser,
 }, {
     method: 'DELETE',
     path: '/api/users',
