@@ -26,6 +26,14 @@ module.exports = [{
     config: Users.getMe,
 }, {
     method: 'GET',
+    path: '/api/users/me/queue',
+    config: Users.queue,
+}, {
+    method: 'GET',
+    path: '/api/users/me/queue_sorted',
+    config: Users.queueSorted,
+}, {
+    method: 'GET',
     path: '/api/users/search',
     config: Users.searchUsers,
 }, {

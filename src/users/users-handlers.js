@@ -9,6 +9,7 @@ const Moment = require('moment');
 
 const MailService = require('../mail/mail');
 const User = require('./users-model');
+const Page = require('../pages/pages-model');
 const Queries = require('../queries/queries');
 
 
@@ -119,6 +120,77 @@ exports.getMe = {
         if (user === "error")
             return reply(Boom.badRequest());
         return reply(user);
+    }
+};
+
+
+// [GET] /api/users/me/queue
+exports.queue = {
+    auth: 'jwt',
+    handler: (request, reply) => {
+
+        const user_id = request.auth.credentials.user_id;
+
+        User.findById(user_id)
+            .populate({
+                path: 'memberPages',
+                model: 'Page',
+                populate: {
+                    path: 'posts',
+                    model: 'Post'
+              }
+            })
+            .exec(function (err, user) {
+                if (err) {
+                    return reply(Boom.badRequest());
+                }
+
+                var queue = [];
+                for (var i = 0; i < user.memberPages.length; i++) {
+                    queue = queue.concat(user.memberPages[i].posts);
+                }
+
+                return reply(queue);
+            });
+    }
+};
+
+
+// [GET] /api/users/me/queue_sorted
+exports.queueSorted = {
+    auth: 'jwt',
+    handler: (request, reply) => {
+
+        const user_id = request.auth.credentials.user_id;
+
+        User.findById(user_id)
+            .populate({
+                path: 'memberPages',
+                model: 'Page',
+                populate: {
+                    path: 'posts',
+                    model: 'Post'
+              }
+            })
+            .exec(function (err, user) {
+                if (err) {
+                    return reply(Boom.badRequest());
+                }
+                
+                var queue = [];
+                for (var i = 0; i < user.memberPages.length; i++) {
+                    queue = queue.concat(user.memberPages[i].posts);
+                }
+
+                // Sort the queue to have most recent posts first.
+                queue.sort(function(a,b){
+                  // Turn strings into dates, and then subtract them to get a
+                  // value that is either negative, positive, or zero. 
+                  return new Date(b.create_date) - new Date(a.create_date);
+                });
+
+                return reply(queue);
+            });
     }
 };
 
