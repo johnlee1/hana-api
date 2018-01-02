@@ -30,3 +30,7 @@ MAIL_PASSWORD
 1. Run `npm run build (version_number)`
 2. Create a new revision of task definition in aws ecs management console.
 3. Update cluster service in aws ecs management console.
+
+
+## gotchas
+* this is dumb but emptry string is not considered a valid string by hapi's joi

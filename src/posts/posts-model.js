@@ -15,16 +15,9 @@ const Schema = new Mongoose.Schema({
         type: String,
         required: true
     },
-    user: {
-        type: Mongoose.Schema.ObjectId, 
-        ref: 'User',
-    },
     create_date: {
         type: Date,
         default: Date.now
-    },
-    expiration_date: {
-        type: Date
     },
     urgent: {
         type: Boolean,

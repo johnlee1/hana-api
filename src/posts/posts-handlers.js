@@ -69,32 +69,32 @@ exports.createPost = {
         payload: {
             id: Joi.string().required(), // page id
             prayer: Joi.string().required(),
-            resolution: Joi.string(),
+            resolution: Joi.string().required(),
             resolved: Joi.boolean().required(),
             story: Joi.string().required(),
             subject: Joi.string().required(),
-            urgent: Joi.boolean(),
+            urgent: Joi.boolean().required(),
         }
     },
     handler: async (request, reply) => {
 
         const id = request.payload.id;
-        const type = request.payload.type;
+
+        let page = await Queries.getPage(id);
+        if (page === "error")
+            return reply(Boom.badRequest());
 
         let post = new Post({
             subject: request.payload.subject,
             story: request.payload.story,
             prayer: request.payload.prayer,
             resolved: request.payload.resolved,
+            resolution: request.payload.resolution,
             urgent: request.payload.urgent
         });
-        
-        let page = await Queries.getPage(id);
-        if (page === "error")
-            return reply(Boom.badRequest());
 
         post.save((err, post) => {
-            if (err) 
+            if (err)
                 return reply(Boom.badRequest());
 
             page.posts.push(post._id);
