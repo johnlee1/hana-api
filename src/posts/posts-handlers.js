@@ -1,6 +1,5 @@
 'use strict';
 
-
 const Boom = require('boom');
 const Joi  = require('joi');
 
@@ -8,6 +7,7 @@ const Group = require('../groups/groups-model');
 const Page  = require('../pages/pages-model');
 const Post  = require('./posts-model');
 const User  = require('../users/users-model');
+const Queries = require('../queries/queries');
 
 
 // [GET] /api/posts/me
@@ -20,8 +20,8 @@ exports.getPosts = {
         User.findById(user_id)
             .populate({path: 'posts', options: { sort: { 'create_date': -1 } }})
             .exec(function (err, user) {
-
-                if (err) return reply(Boom.badRequest());
+                if (err) 
+                    return reply(Boom.badRequest());
 
                 return reply(user);
             });
@@ -32,18 +32,15 @@ exports.getPosts = {
 // [GET] /api/posts/{user_id}
 exports.getUserPosts = {
     auth: 'jwt',
-    handler: (request, reply) => {
+    handler: async (request, reply) => {
 
         const user_id = request.params.user_id;
 
-        User.findById(user_id)
-            .populate('posts')
-            .exec(function (err, user) {
+        let user = await Queries.getUserWithPosts(user_id);
+        if (user === "error")
+            return reply(Boom.badRequest());
 
-                if (err) return reply(Boom.badRequest());
-
-                return reply(user.posts);
-            });
+        return reply(user);
     }
 };
 
@@ -56,8 +53,8 @@ exports.getPost = {
         const post_id = request.params.post_id;
 
         Post.findById(post_id, (err, post) => {
-
-            if (err) return reply(Boom.badRequest());
+            if (err) 
+                return reply(Boom.badRequest());
 
             return reply(post);
         });
@@ -70,81 +67,39 @@ exports.createPost = {
     auth: 'jwt',
     validate: {
         payload: {
-            id: Joi.string().required(),
+            id: Joi.string().required(), // page id
             prayer: Joi.string().required(),
-            private: Joi.boolean(),
-            public: Joi.boolean(),
-            resolution: Joi.string(),
+            resolution: Joi.string().required(),
             resolved: Joi.boolean().required(),
             story: Joi.string().required(),
             subject: Joi.string().required(),
-            type: Joi.string().required(),
-            urgent: Joi.boolean(),
+            urgent: Joi.boolean().required(),
         }
     },
-    handler: (request, reply) => {
+    handler: async (request, reply) => {
 
         const id = request.payload.id;
-        const type = request.payload.type;
-        const user_id = request.auth.credentials.user_id;
 
-        User.findById(user_id, (err, user) => {
+        let page = await Queries.getPage(id);
+        if (page === "error")
+            return reply(Boom.badRequest());
 
-            if (err) return reply(Boom.internal('Error retrieving user'));
+        let post = new Post({
+            subject: request.payload.subject,
+            story: request.payload.story,
+            prayer: request.payload.prayer,
+            resolved: request.payload.resolved,
+            resolution: request.payload.resolution,
+            urgent: request.payload.urgent
+        });
 
-            let post = new Post({
-                subject: request.payload.subject,
-                story: request.payload.story,
-                prayer: request.payload.prayer,
-                private: request.payload.private,
-                urgent: request.payload.urgent
-            });
+        post.save((err, post) => {
+            if (err)
+                return reply(Boom.badRequest());
 
-            switch(type) {
-
-            case 'profile':
-                post.save((err, post) => {
-
-                    if (err) return reply(Boom.badRequest());
-
-                    user.posts.push(post._id);
-                    user.save();
-                    return reply({message: 'success'});
-                });
-                break;
-
-            case 'page':
-                Page.findById(id, (err, page) => {
-
-                    if (err) return reply(Boom.badRequest());
-
-                    post.save((err, post) => {
-
-                        if (err) return reply(Boom.badRequest());
-
-                        page.posts.push(post._id);
-                        page.save();
-                        return reply({message: 'success'});
-                    });
-                });
-                break;
-
-            case 'circle':
-                Group.findById(id, (err, group) => {
-
-                    if (err) return reply(Boom.badRequest());
-
-                    post.save((err, post) => {
-
-                        if (err) return reply(Boom.badRequest());
-
-                        group.posts.push(post._id);
-                        group.save();
-                        return reply({msg: 'success'});
-                    });
-                });
-                break;
-            }
+            page.posts.push(post._id);
+            page.save();
+            return reply({message: 'success'});
         });
     }
 };
@@ -179,8 +134,8 @@ exports.updatePost = {
         };
 
         Post.findByIdAndUpdate(post_id, {$set:update}, (err) => {
-
-            if (err) return reply(Boom.badRequest());
+            if (err) 
+                return reply(Boom.badRequest());
 
             return reply({message: 'success'});
         });
@@ -197,15 +152,15 @@ exports.deletePost = {
         const post_id = request.params.post_id;
 
         User.findById(user_id, 'posts', (err, user) => {
-
-            if (err) return reply(Boom.badRequest());
+            if (err) 
+                return reply(Boom.badRequest());
 
             user.posts.pull({_id: post_id});
             user.save();
 
             Post.findByIdAndRemove(post_id, (err) => {
-
-                if (err) return reply(Boom.badRequest());
+                if (err) 
+                    return reply(Boom.badRequest());
 
                 return reply({message: 'success'});
             });

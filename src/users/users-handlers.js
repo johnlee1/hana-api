@@ -1,6 +1,5 @@
 'use strict';
 
-
 const Bcrypt = require('bcrypt');
 const Boom = require('boom');
 const Joi = require('joi');
@@ -11,7 +10,6 @@ const MailService = require('../mail/mail');
 const User = require('./users-model');
 const Page = require('../pages/pages-model');
 const Queries = require('../queries/queries');
-
 
 const _privateKey = process.env.JWT_PRIVATE_KEY;
 
@@ -72,53 +70,17 @@ exports.confirm = {
 };
 
 
-// [GET] /api/users/followers
-exports.followers = {
-    auth: 'jwt',
-    handler: (request, reply) => {
-
-        const user_id = request.auth.credentials.user_id;
-
-        User.findById(user_id)
-            .populate('followers', '-password')
-            .exec(function (err, user) {
-                if (err) {
-                    return reply(Boom.badRequest());
-                }
-                return reply(user.followers);
-            });
-    }
-};
-
-
-// [GET] /api/users/following
-exports.following = {
-    auth: 'jwt',
-    handler: (request, reply) => {
-
-        const user_id = request.auth.credentials.user_id;
-
-        User.findById(user_id)
-            .populate('following', '-password')
-            .exec(function (err, user) {
-                if (err) {
-                    return reply(Boom.badRequest());
-                }
-                return reply(user.following);
-            });
-    }
-};
-
-
 // [GET] /api/users/me
 exports.getMe = {
     auth: 'jwt',
     handler: async (request, reply) => {
 
         const user_id = request.auth.credentials.user_id;
+
         let user = await Queries.getUser(user_id);
         if (user === "error")
             return reply(Boom.badRequest());
+
         return reply(user);
     }
 };
@@ -230,12 +192,10 @@ exports.searchUsers = {
         User.find({name: new RegExp(regexQuery, 'i'), _id: { $ne: user_id }})
             .select('-groups -adminPages -memberPages -following -followers -posts -email -isVerified')
             .exec(function(err, users) {
-                if(err) {
+                if (err)
                     return reply(Boom.badRequest());
-                }
-                else {
-                    return reply(users);
-                }
+
+                return reply(users);
             });
     }
 };
@@ -256,7 +216,7 @@ exports.getUser = {
             }
 
             User.findById(user_id)
-                .populate('posts', null, { private: false })
+                .populate('posts', null, { private: false }) // does ui still need this?
                 .exec(function (err, user) {
                     if (err) {
                         return reply(Boom.badRequest());
@@ -429,40 +389,6 @@ exports.updatePassword = {
                 }
             });
         }
-    }
-};
-
-
-// [PUT] /api/users/follow/{user_id}
-exports.followUser = {
-    auth: 'jwt',
-    handler: (request, reply) => {
-
-        const user_id = request.auth.credentials.user_id;
-        const followed_user_id = request.params.user_id;
-        
-        User.findById(user_id, (err, user) => {
-
-            if (err) {
-                return reply(Boom.internal('Error retrieving user'));
-            }
-
-            user.following.push(followed_user_id);
-
-            User.findById(followed_user_id, (err, followed_user) => {
-
-                if (err) {
-                    return reply(Boom.badRequest());
-                } 
-
-                followed_user.followers.push(user_id);
-
-                user.save();
-                followed_user.save();
-
-                return reply({message:'success'});
-            });
-        });
     }
 };
 
