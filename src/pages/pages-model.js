@@ -22,6 +22,8 @@ const Schema = new Mongoose.Schema({
     },
     admins: 
         [{ type : Mongoose.Schema.ObjectId, ref : 'User' }],
+    contributors: 
+        [{ type : Mongoose.Schema.ObjectId, ref : 'User' }],
     followers: 
         [{ type : Mongoose.Schema.ObjectId, ref : 'User' }],
     posts: 

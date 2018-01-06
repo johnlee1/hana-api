@@ -60,18 +60,16 @@ exports.getPage = {
         Page.findById(page_id)
             .populate({path: 'posts', options: {sort: { 'create_date': -1} }})
             .exec((err, page) => {
-                if (err) {
+                if (err)
                     return reply(Boom.badRequest());
-                } 
-                else if (page.admins.indexOf(user_id) > -1) {
+                else if (page.admins.indexOf(user_id) > -1)
                     return reply({level: 'admin', page: page});
-                } 
-                else if (page.followers.indexOf(user_id) > -1) {
+                else if (page.contributors.indexOf(user_id) > -1)
+                    return reply({level: 'contributor', page: page});
+                else if (page.followers.indexOf(user_id) > -1)
                     return reply({level: 'follower', page: page});
-                } 
-                else { 
-                    return reply({level: 'none', page: page});
-                }                
+                else
+                    return reply({level: 'none', page: page});          
             });
     }
 };
@@ -97,12 +95,14 @@ exports.searchCode = {
     auth: 'jwt',
     handler: (request, reply) => {
 
-        Page.findOne({name: request.query.q}, function(err, page) {
-            if (err)
-                return reply(Boom.badRequest());
-
-            return reply(page);
-        });
+        Page.findOne({code: request.query.q})
+            .select('-admins')
+            .exec((err, page) => {
+                if (err)
+                    return reply(Boom.badRequest());
+                
+                return reply({page: page});
+            });
     }
 };
 
@@ -122,11 +122,9 @@ exports.createPage = {
 
         User.findById(user_id, (err, user) => {
 
-            if (err) {
+            if (err)
                 return reply(Boom.internal('Error retrieving user'));
-            }
 
-            // create page
             let name = request.payload.name;
             let description = request.payload.description;
             let page = new Page({
@@ -158,20 +156,17 @@ exports.followPage = {
         
         User.findById(user_id, (err, user) => {
 
-            if (err) {
+            if (err)
                 return reply(Boom.internal('Error retrieving user'));
-            }
 
             user.memberPages.push(page_id);
 
             Page.findById(page_id, (err, page) => {
 
-                if (err) {
+                if (err)
                     return reply(Boom.badRequest());
-                } 
 
                 page.followers.push(user_id);
-
                 user.save();
                 page.save();
 
@@ -215,9 +210,8 @@ exports.unfollowPage = {
         
         User.findById(user_id, (err, user) => {
 
-            if (err) {
+            if (err)
                 return reply(Boom.internal('Error retrieving user'));
-            }
 
             user.memberPages.pull({_id: page_id});
 
@@ -254,20 +248,17 @@ exports.updatePage = {
         let page_id = request.params.page_id;
 
         Page.findById(page_id, (err, page) => {
-            let admins = page.admins.map(function(admin) {
-                return admin.toString();
-            });
+            let admins = page.admins.map((admin) => admin.toString());
             if (err) {
                 return reply(Boom.badRequest());
             } else if (admins.includes(user_id)) {
                 page.name = request.payload.name;
                 page.description = request.payload.description;
                 page.save((err) => {
-                    if (err) {
+                    if (err)
                         return reply(Boom.badRequest());
-                    } else {
+                    else
                         return reply({message: 'success'});
-                    }
                 });
             } else {
                 return reply(Boom.forbidden('You must be an admin to perform this action.'));
