@@ -5,6 +5,25 @@ const Joi = require('joi');
 
 const Page = require('./pages-model');
 const User = require('../users/users-model');
+const Queries = require('../utils/queries');
+const Utils = require('../utils/utils');
+
+
+// [GET] /api/pages/code/{page_id}
+exports.getPageCode = {
+    auth: 'jwt',
+    handler: (request, reply) => { 
+
+        let user_id = request.auth.credentials.user_id;
+        let page_id = request.params.page_id;
+
+        let page = Queries.getPage(page_id);
+        if (page === "error")
+            return reply(Boom.badRequest());
+
+        return reply(page.code);
+    }
+};
 
 
 // [GET] /api/pages/me
@@ -64,12 +83,25 @@ exports.searchPages = {
     handler: (request, reply) => {
 
         Page.find({name: new RegExp(request.query.q,'i')}, function(err, pages) {
-            if (err) {
+            if (err)
                 return reply(Boom.badRequest());
-            }
-            else {
-                return reply(pages);
-            }
+
+            return reply(pages);
+        });
+    }
+};
+
+
+// [GET] /api/pages/search/code
+exports.searchCode = {
+    auth: 'jwt',
+    handler: (request, reply) => {
+
+        Page.findOne({name: request.query.q}, function(err, page) {
+            if (err)
+                return reply(Boom.badRequest());
+
+            return reply(page);
         });
     }
 };
@@ -104,10 +136,9 @@ exports.createPage = {
             page.admins.push(user_id);
 
             page.save((err, page) => {
-                if (err) {
+                if (err)
                     return reply(Boom.badRequest());
-                }
-                // update user's admin pages
+
                 user.adminPages.push(page._id);
                 user.save();    
                 return reply(page);
@@ -146,6 +177,29 @@ exports.followPage = {
 
                 return reply({level:'follower'});
             });
+        });
+    }
+};
+
+
+// [PUT] /api/pages/refresh_code/{page_id}
+exports.refreshCode = {
+    auth: 'jwt',
+    handler: async (request, reply) => {
+
+        let user_id = request.auth.credentials.user_id;
+        let page_id = request.params.page_id;
+        
+        let page = await Queries.getPage(page_id);
+        if (page === "error")
+            return reply(Boom.badRequest());
+
+        page.code = Utils.guid();
+        page.save((err, page) => {
+            if (err)
+                return reply(Boom.badRequest());
+  
+            return reply({code: page.code});
         });
     }
 };

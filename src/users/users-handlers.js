@@ -9,7 +9,7 @@ const Moment = require('moment');
 const MailService = require('../mail/mail');
 const User = require('./users-model');
 const Page = require('../pages/pages-model');
-const Queries = require('../queries/queries');
+const Queries = require('../utils/queries');
 
 const _privateKey = process.env.JWT_PRIVATE_KEY;
 

@@ -6,6 +6,10 @@ const Pages = require('./pages-handlers');
 
 module.exports = [{
     method: 'GET',
+    path: '/api/pages/code/{page_code}',
+    config: Pages.getPageCode,
+}, {
+    method: 'GET',
     path: '/api/pages/me',
     config: Pages.getPages,
 }, {
@@ -17,6 +21,10 @@ module.exports = [{
     path: '/api/pages/search',
     config: Pages.searchPages,
 }, {
+    method: 'GET',
+    path: '/api/pages/search/code',
+    config: Pages.searchCode,
+}, {
     method: 'POST',
     path: '/api/pages/',
     config: Pages.createPage,
@@ -24,6 +32,10 @@ module.exports = [{
     method: 'PUT',
     path: '/api/pages/follow/{page_id}',
     config: Pages.followPage,
+}, {
+    method: 'PUT',
+    path: '/api/pages/refresh_code/{page_id}',
+    config: Pages.refreshCode,
 }, {
     method: 'PUT',
     path: '/api/pages/unfollow/{page_id}',

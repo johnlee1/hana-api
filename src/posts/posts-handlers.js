@@ -7,7 +7,7 @@ const Group = require('../groups/groups-model');
 const Page  = require('../pages/pages-model');
 const Post  = require('./posts-model');
 const User  = require('../users/users-model');
-const Queries = require('../queries/queries');
+const Queries = require('../utils/queries');
 
 
 // [GET] /api/posts/me

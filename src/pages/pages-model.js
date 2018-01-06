@@ -17,6 +17,9 @@ const Schema = new Mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    code: {
+        type: String
+    },
     admins: 
         [{ type : Mongoose.Schema.ObjectId, ref : 'User' }],
     followers: 
