@@ -30,6 +30,10 @@ module.exports = [{
     config: Pages.createPage,
 }, {
     method: 'PUT',
+    path: '/api/join_page/{page_id}/{page_code}',
+    config: Pages.joinPage,
+}, {
+    method: 'PUT',
     path: '/api/pages/follow/{page_id}',
     config: Pages.followPage,
 }, {

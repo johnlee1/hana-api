@@ -17,7 +17,15 @@ const Schema = new Mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    code: {
+    private: {
+        type: Boolean,
+        required: true,
+        default: true
+    },
+    admin_code: {
+        type: String
+    },
+    contributor_code: {
         type: String
     },
     admins: 

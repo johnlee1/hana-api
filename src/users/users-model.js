@@ -38,6 +38,10 @@ const Schema = new Mongoose.Schema({
         type: [{ type: Mongoose.Schema.ObjectId, ref: 'Page' }],
         default: []
     },
+    contributorPages: {
+        type: [{ type: Mongoose.Schema.ObjectId, ref: 'Page' }],
+        default: []
+    },
     memberPages: {
         type: [{ type: Mongoose.Schema.ObjectId, ref: 'Page' }],
         default: []

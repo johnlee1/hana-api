@@ -58,13 +58,13 @@ exports.getPage = {
         let page_id = request.params.page_id;
 
         Page.findById(page_id)
-            .populate({path: 'posts', options: {sort: { 'create_date': -1} }})
+            .populate([{path: 'posts', options: {sort: { 'create_date': -1} }}, {path: 'admins'}, {path: 'contributors'}])
             .exec((err, page) => {
                 if (err)
                     return reply(Boom.badRequest());
-                else if (page.admins.indexOf(user_id) > -1)
+                else if (page.admins.filter(admin => admin._id == user_id).length > 0)
                     return reply({level: 'admin', page: page});
-                else if (page.contributors.indexOf(user_id) > -1)
+                else if (page.contributors.filter(contributor => contributor._id == user_id).length > 0)
                     return reply({level: 'contributor', page: page});
                 else if (page.followers.indexOf(user_id) > -1)
                     return reply({level: 'follower', page: page});
@@ -142,6 +142,42 @@ exports.createPage = {
                 return reply(page);
             });
         });
+    }
+};
+
+
+// [PUT] /api/join_page/{page_id}/{page_code}
+exports.joinPage = {
+    auth: 'jwt',
+    handler: async (request, reply) => {
+
+        let user_id = request.auth.credentials.user_id;
+        let page_id = request.params.page_id;
+        let page_code = request.params.page_code;
+
+        let user = await Queries.getUser(user_id);
+        if (user === "error")
+            return reply(Boom.badRequest());
+
+        let page = await Queries.getPage(page_id);
+        if (page === "error")
+            return reply(Boom.badRequest());
+
+        if (page_code === page.adminCode) {
+            user.adminPages.push(page_id);
+            page.admins.push(user_id);
+            user.save();
+            page.save();
+        }
+
+        if (page_code === page.contributorCode) {
+            user.contributorPages.push(page_id);
+            page.contributors.push(user_id)
+            user.save();
+            page.save();
+        }
+
+        return reply({});
     }
 };
 
