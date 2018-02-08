@@ -26,7 +26,7 @@ module.exports = [{
     config: Pages.searchCode,
 }, {
     method: 'POST',
-    path: '/api/pages/',
+    path: '/api/pages',
     config: Pages.createPage,
 }, {
     method: 'PUT',

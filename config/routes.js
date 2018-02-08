@@ -16,5 +16,8 @@ routes = routes.concat(pagesRoutes);
 const groupsRoutes = require('../src/groups/groups-routes');
 routes = routes.concat(groupsRoutes);
 
+const listsRoutes = require('../src/lists/lists-routes');
+routes = routes.concat(listsRoutes);
+
 
 module.exports = routes;
