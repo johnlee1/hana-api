@@ -28,9 +28,19 @@ exports.getUser = async function getUser(user_id) {
     });
 }
 
-exports.getUserWithPosts = async function getUser(user_id) {
+exports.getUserWithPosts = async function getUserWithPosts(user_id) {
     return await User.findById(user_id)
                      .populate('posts')
+                     .exec((err, user) => {
+                        if (err)
+                            return "error";
+                        return user;
+                     });
+}
+
+exports.getUserWithLists = async function getUserWithLists(user_id) {
+    return await User.findById(user_id)
+                     .populate('lists')
                      .exec((err, user) => {
                         if (err)
                             return "error";

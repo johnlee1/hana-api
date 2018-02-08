@@ -3,30 +3,24 @@
 const Boom = require('boom');
 const Joi = require('joi');
 
-const Page = require('./lists-model');
+const List = require('./lists-model');
+const Post = require('../posts/posts-model');
 const User = require('../users/users-model');
-const Queries = require('../queries/queries');
+const Queries = require('../utils/queries');
 
 
 // [GET] /api/lists/me
 exports.getLists = {
     auth: 'jwt',
-    handler: (request, reply) => {
+    handler: async (request, reply) => {
 
         let user_id = request.auth.credentials.user_id;
 
-        User.findById(user_id)
-            .populate('adminPages memberPages')
-            .exec(function (err, user) {
-                if (err) {
-                    return reply(Boom.badRequest());
-                }
-                let pages = {
-                    adminPages: user.adminPages, 
-                    memberPages: user.memberPages
-                };
-                return reply(pages);
-            });
+        let user = await Queries.getUserWithLists(user_id);
+        if (user === "error")
+            return reply(Boom.badRequest());
+        
+        return reply(user.lists);
     }
 };
 
@@ -37,22 +31,16 @@ exports.getList = {
     handler: (request, reply) => { 
 
         let user_id = request.auth.credentials.user_id;
-        let page_id = request.params.page_id;
+        let list_id = request.params.list_id;
 
-        Page.findById(page_id)
+        List.findById(list_id)
             .populate({path: 'posts', options: {sort: { 'create_date': -1} }})
-            .exec((err, page) => {
+            .exec((err, list) => {
                 if (err) {
                     return reply(Boom.badRequest());
                 } 
-                else if (page.admins.indexOf(user_id) > -1) {
-                    return reply({level: 'admin', page: page});
-                } 
-                else if (page.followers.indexOf(user_id) > -1) {
-                    return reply({level: 'follower', page: page});
-                } 
                 else { 
-                    return reply({level: 'none', page: page});
+                    return reply(list);
                 }                
             });
     }
@@ -60,15 +48,14 @@ exports.getList = {
 
 
 // [POST] api/lists
-exports.createList = {   
+exports.createList = {
     auth: 'jwt',
     validate: {
         payload: {
-            name: Joi.string().required(),
-            description: Joi.string().required()
+            name: Joi.string().required()
         }
     },
-    handler: (request, reply) => {
+    handler: async(request, reply) => {
 
         let user_id = request.auth.credentials.user_id;
 
@@ -76,23 +63,93 @@ exports.createList = {
         if (user === "error")
             return reply(Boom.badRequest());
 
-        // create page
+        // create list
         let name = request.payload.name;
-        let description = request.payload.description;
-        let page = new Page({
+        let list = new List({
             name: name,
-            description: description,
         });
-        page.admins.push(user_id);
 
-        page.save((err, page) => {
+        list.save((err, list) => {
+                if (err)
+                    return reply(Boom.badRequest());
+                // update user's lists
+                user.lists.push(list._id);
+                user.save();    
+                return reply(list);
+            });
+    }
+};
+
+
+// [PUT] /api/lists/addPost/{list_id}
+exports.addPost = {
+    auth: 'jwt',    
+    validate: {
+        payload: {
+            post_id: Joi.string().required()
+        }
+    },
+    handler: async (request, reply) => {
+
+        let user_id = request.auth.credentials.user_id;
+        let list_id = request.params.list_id;
+
+        let list = await Queries.getList(list_id);
+        if (list === "error")
+            return reply(Boom.badRequest());
+
+        const post_id = request.payload.post_id;
+
+        Post.findById(post_id)
+            .exec((err, post) => {
+                if (err) {
+                    return reply(Boom.badRequest());
+                } 
+                else { 
+                    list.posts.push(post);
+                    list.save((err) => {
+                        if (err)
+                            return reply(Boom.badRequest());
+                        else
+                            return reply(list);
+                    });
+                }                
+            });
+    }
+};
+
+
+// [PUT] /api/lists/removePost/{list_id}
+exports.removePost = {
+    auth: 'jwt',    
+    validate: {
+        payload: {
+            post_id: Joi.string().required()
+        }
+    },
+    handler: async (request, reply) => {
+
+        let user_id = request.auth.credentials.user_id;
+        let list_id = request.params.list_id;
+
+        let list = await Queries.getList(list_id);
+        if (list === "error")
+            return reply(Boom.badRequest());
+
+        const post_id = request.payload.post_id;
+
+        // Find the index of the post in the list.
+        const index = list.posts.indexOf(post_id);
+        if (index != -1) {
+            // Remove 1 element from index location.
+            list.posts.splice(index, 1);
+        }
+
+        list.save((err) => {
             if (err)
                 return reply(Boom.badRequest());
-
-            // update user's admin pages
-            user.adminPages.push(page._id);
-            user.save();    
-            return reply(page);
+            else
+                return reply(list);
         });
     }
 };
@@ -103,11 +160,10 @@ exports.updateList = {
     auth: 'jwt',    
     validate: {
         payload: {
-            name: Joi.string().required(),
-            description: Joi.string().required()
+            name: Joi.string().required()
         }
     },
-    handler: (request, reply) => {
+    handler: async (request, reply) => {
 
         let user_id = request.auth.credentials.user_id;
         let list_id = request.params.list_id;
@@ -117,7 +173,6 @@ exports.updateList = {
             return reply(Boom.badRequest());
 
         list.name = request.payload.name;
-        list.description = request.payload.description;
         list.save((err) => {
             if (err)
                 return reply(Boom.badRequest());

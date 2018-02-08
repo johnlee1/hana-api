@@ -11,13 +11,21 @@ module.exports = [{
 }, {
     method: 'GET',
     path: '/api/lists/{list_id}',
-    config: Lists.getPage,
+    config: Lists.getList,
 }, {
     method: 'POST',
-    path: '/api/lists/',
-    config: Lists.createPage,
+    path: '/api/lists',
+    config: Lists.createList,
+}, {
+    method: 'PUT',
+    path: '/api/lists/addPost/{list_id}',
+    config: Lists.addPost,
+}, {
+    method: 'PUT',
+    path: '/api/lists/removePost/{list_id}',
+    config: Lists.removePost,
 }, {
     method: 'PUT',
     path: '/api/lists/{list_id}',
-    config: Lists.updatePage,
+    config: Lists.updateList,
 }];

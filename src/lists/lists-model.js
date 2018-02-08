@@ -7,10 +7,6 @@ const Schema = new Mongoose.Schema({
         type: String,
         required: true
     },
-    description: {
-        type: String,
-        required: true
-    },
     created_date: {
         type: Date,
         default: Date.now
