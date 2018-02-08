@@ -70,13 +70,13 @@ exports.createList = {
         });
 
         list.save((err, list) => {
-                if (err)
-                    return reply(Boom.badRequest());
-                // update user's lists
-                user.lists.push(list._id);
-                user.save();    
-                return reply(list);
-            });
+            if (err)
+                return reply(Boom.badRequest());
+            // update user's lists
+            user.lists.push(list._id);
+            user.save();    
+            return reply(list);
+        });
     }
 };
 
@@ -100,21 +100,13 @@ exports.addPost = {
 
         const post_id = request.payload.post_id;
 
-        Post.findById(post_id)
-            .exec((err, post) => {
-                if (err) {
-                    return reply(Boom.badRequest());
-                } 
-                else { 
-                    list.posts.push(post);
-                    list.save((err) => {
-                        if (err)
-                            return reply(Boom.badRequest());
-                        else
-                            return reply(list);
-                    });
-                }                
-            });
+        list.posts.push(post_id);
+        list.save((err) => {
+            if (err)
+                return reply(Boom.badRequest());
+            else
+                return reply(list);
+        });
     }
 };
 
