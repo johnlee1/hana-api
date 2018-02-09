@@ -30,17 +30,19 @@ module.exports = [{
     config: Pages.createPage,
 }, {
     method: 'PUT',
-    path: '/api/join_page/{page_id}/{page_code}',
+    path: '/api/pages/join/{page_id}/{page_code}',
     config: Pages.joinPage,
 }, {
     method: 'PUT',
     path: '/api/pages/follow/{page_id}',
     config: Pages.followPage,
-}, {
-    method: 'PUT',
-    path: '/api/pages/refresh_code/{page_id}',
-    config: Pages.refreshCode,
-}, {
+}, 
+// {
+//     method: 'PUT',
+//     path: '/api/pages/refresh_code/{page_id}',
+//     config: Pages.refreshCode,
+// }, 
+{
     method: 'PUT',
     path: '/api/pages/unfollow/{page_id}',
     config: Pages.unfollowPage,

@@ -55,7 +55,7 @@ exports.createList = {
             name: Joi.string().required()
         }
     },
-    handler: async(request, reply) => {
+    handler: async (request, reply) => {
 
         let user_id = request.auth.credentials.user_id;
 

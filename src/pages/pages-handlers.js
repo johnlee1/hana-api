@@ -130,6 +130,8 @@ exports.createPage = {
             let page = new Page({
                 name: name,
                 description: description,
+                admin_code: Utils.guid(),
+                contributor_code: Utils.guid()
             });
             page.admins.push(user_id);
 
@@ -146,7 +148,7 @@ exports.createPage = {
 };
 
 
-// [PUT] /api/join_page/{page_id}/{page_code}
+// [PUT] /api/pages/join/{page_id}/{page_code}
 exports.joinPage = {
     auth: 'jwt',
     handler: async (request, reply) => {
@@ -162,6 +164,9 @@ exports.joinPage = {
         let page = await Queries.getPage(page_id);
         if (page === "error")
             return reply(Boom.badRequest());
+
+        if (user.adminPages.includes(page_code) || user.contributorPages.includes(page_code))
+            return reply({message: "already"});
 
         if (page_code === page.adminCode) {
             user.adminPages.push(page_id);
@@ -214,26 +219,26 @@ exports.followPage = {
 
 
 // [PUT] /api/pages/refresh_code/{page_id}
-exports.refreshCode = {
-    auth: 'jwt',
-    handler: async (request, reply) => {
+// exports.refreshCode = {
+//     auth: 'jwt',
+//     handler: async (request, reply) => {
 
-        let user_id = request.auth.credentials.user_id;
-        let page_id = request.params.page_id;
+//         let user_id = request.auth.credentials.user_id;
+//         let page_id = request.params.page_id;
         
-        let page = await Queries.getPage(page_id);
-        if (page === "error")
-            return reply(Boom.badRequest());
+//         let page = await Queries.getPage(page_id);
+//         if (page === "error")
+//             return reply(Boom.badRequest());
 
-        page.code = Utils.guid();
-        page.save((err, page) => {
-            if (err)
-                return reply(Boom.badRequest());
+//         page.code = Utils.guid();
+//         page.save((err, page) => {
+//             if (err)
+//                 return reply(Boom.badRequest());
   
-            return reply({code: page.code});
-        });
-    }
-};
+//             return reply({code: page.code});
+//         });
+//     }
+// };
 
 
 // [PUT] /api/pages/unfollow/{page_id}
