@@ -101,11 +101,11 @@ exports.addPost = {
         const post_id = request.payload.post_id;
 
         list.posts.push(post_id);
-        list.save((err) => {
+        list.save((err, list) => {
             if (err)
                 return reply(Boom.badRequest());
             else
-                return reply(list);
+                return reply({message: 'success', list: list});
         });
     }
 };
@@ -137,11 +137,11 @@ exports.removePost = {
             list.posts.splice(index, 1);
         }
 
-        list.save((err) => {
+        list.save((err, list) => {
             if (err)
                 return reply(Boom.badRequest());
             else
-                return reply(list);
+                return reply({message: 'success', list: list});
         });
     }
 };

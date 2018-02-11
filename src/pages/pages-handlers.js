@@ -34,13 +34,14 @@ exports.getPages = {
         let user_id = request.auth.credentials.user_id;
 
         User.findById(user_id)
-            .populate('adminPages memberPages')
+            .populate('adminPages contributorPages memberPages')
             .exec(function (err, user) {
-                if (err) {
+                if (err)
                     return reply(Boom.badRequest());
-                }
+
                 let pages = {
-                    adminPages: user.adminPages, 
+                    adminPages: user.adminPages,
+                    contributorPages: user.contributorPages,
                     memberPages: user.memberPages
                 };
                 return reply(pages);
@@ -80,9 +81,16 @@ exports.searchPages = {
     auth: 'jwt',
     handler: (request, reply) => {
 
-        Page.find({name: new RegExp(request.query.q,'i')}, function(err, pages) {
+        Page.find({name: new RegExp(request.query.q,'i'), private: false}, function(err, pages) {
             if (err)
                 return reply(Boom.badRequest());
+
+            // const user_id = request.auth.credentials.user_id;
+            // pages = pages.filter((page) => {
+            //     !page.admins.includes(user_id) &&
+            //     !page.contributors.includes(user_id) &&
+            //     !page.followers.includes(user_id)
+            // })
 
             return reply(pages);
         });
@@ -113,36 +121,34 @@ exports.createPage = {
     validate: {
         payload: {
             name: Joi.string().required(),
-            description: Joi.string().required()
+            description: Joi.string().required(),
+            private: Joi.string().required()
         }
     },
-    handler: (request, reply) => {
-
+    handler: async (request, reply) => {
+        console.log(request.payload);
         let user_id = request.auth.credentials.user_id;
 
-        User.findById(user_id, (err, user) => {
+        let user = await Queries.getUser(user_id);
+        if (user === "error")
+            return reply(Boom.badRequest());
 
+        let page = new Page({
+            name: request.payload.name,
+            description: request.payload.description,
+            private: request.payload.private != 'public',
+            admin_code: Utils.guid(),
+            contributor_code: Utils.guid()
+        });
+        page.admins.push(user_id);
+
+        page.save((err, page) => {
             if (err)
-                return reply(Boom.internal('Error retrieving user'));
+                return reply(Boom.badRequest());
 
-            let name = request.payload.name;
-            let description = request.payload.description;
-            let page = new Page({
-                name: name,
-                description: description,
-                admin_code: Utils.guid(),
-                contributor_code: Utils.guid()
-            });
-            page.admins.push(user_id);
-
-            page.save((err, page) => {
-                if (err)
-                    return reply(Boom.badRequest());
-
-                user.adminPages.push(page._id);
-                user.save();    
-                return reply(page);
-            });
+            user.adminPages.push(page._id);
+            user.save();    
+            return reply(page);
         });
     }
 };
@@ -168,21 +174,27 @@ exports.joinPage = {
         if (user.adminPages.includes(page_code) || user.contributorPages.includes(page_code))
             return reply({message: "already"});
 
-        if (page_code === page.adminCode) {
+        console.log(page_code);
+        console.log(page.admin_code);
+        console.log(page.contributor_code);
+        
+        if (page_code === page.admin_code) {
             user.adminPages.push(page_id);
             page.admins.push(user_id);
             user.save();
             page.save();
+            console.log("1");
         }
 
-        if (page_code === page.contributorCode) {
+        if (page_code === page.contributor_code) {
             user.contributorPages.push(page_id);
             page.contributors.push(user_id)
             user.save();
             page.save();
+            console.log("2");
         }
 
-        return reply({});
+        return reply({message: "success"});
     }
 };
 
