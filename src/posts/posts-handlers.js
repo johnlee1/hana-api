@@ -61,6 +61,19 @@ exports.getPost = {
     }
 };
 
+// [GET] /api/posts/location
+exports.getLocation = {
+    auth: 'jwt',
+    handler: (request, reply) => { 
+        Post.find({location: request.query.location}, function(err, post){
+            if (err) 
+                return reply(Boom.badRequest());
+
+            return reply(post);
+        });
+    }
+};
+
 
 // [POST] /api/posts
 exports.createPost = {   
@@ -74,6 +87,7 @@ exports.createPost = {
             story: Joi.string().required(),
             subject: Joi.string().required(),
             urgent: Joi.boolean().required(),
+            location: Joi.string().required(),
         }
     },
     handler: async (request, reply) => {
@@ -90,7 +104,8 @@ exports.createPost = {
             prayer: request.payload.prayer,
             resolved: request.payload.resolved,
             resolution: request.payload.resolution,
-            urgent: request.payload.urgent
+            urgent: request.payload.urgent,
+            location: request.payload.location,
         });
 
         post.save((err, post) => {
@@ -118,6 +133,7 @@ exports.updatePost = {
             story: Joi.string().required(),
             subject: Joi.string().required(),
             urgent: Joi.boolean().required(),
+            location: Joi.string(),
         }
     },
     handler: (request, reply) => { 
@@ -131,6 +147,7 @@ exports.updatePost = {
             story: request.payload.story,
             subject: request.payload.subject,
             urgent: request.payload.urgent,
+            location: request.payload.location,
         };
 
         Post.findByIdAndUpdate(post_id, {$set:update}, (err) => {
