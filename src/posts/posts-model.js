@@ -15,6 +15,10 @@ const Schema = new Mongoose.Schema({
         type: String,
         required: true
     },
+    location: {
+        type: String,
+        required: false
+    },
     create_date: {
         type: Date,
         default: Date.now

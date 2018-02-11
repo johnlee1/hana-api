@@ -17,6 +17,10 @@ module.exports = [{
     path: '/api/posts/{post_id}',
     config: Posts.getPost,
 }, {
+    method: 'GET',
+    path: '/api/posts/location',
+    config: Posts.getLocation,
+},  {
     method: 'POST',
     path: '/api/posts',
     config: Posts.createPost,
