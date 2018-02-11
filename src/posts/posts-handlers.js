@@ -79,7 +79,8 @@ exports.createPost = {
     handler: async (request, reply) => {
 
         const id = request.payload.id;
-
+        const user_id = request.auth.credentials.user_id;
+        
         let page = await Queries.getPage(id);
         if (page === "error")
             return reply(Boom.badRequest());
@@ -90,7 +91,8 @@ exports.createPost = {
             prayer: request.payload.prayer,
             resolved: request.payload.resolved,
             resolution: request.payload.resolution,
-            urgent: request.payload.urgent
+            urgent: request.payload.urgent,
+            userId: user_id
         });
 
         post.save((err, post) => {

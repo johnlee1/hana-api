@@ -9,6 +9,7 @@ const Moment = require('moment');
 const MailService = require('../mail/mail');
 const User = require('./users-model');
 const Page = require('../pages/pages-model');
+const Posts = require('../posts/posts-model'); 
 const Queries = require('../utils/queries');
 
 const _privateKey = process.env.JWT_PRIVATE_KEY;
@@ -455,26 +456,48 @@ exports.unfollowUser = {
 };
 
 
-// [DELETE] /api/users/delete
+async function getAllPosts(user_id) {
+    console.log("getAllPosts");
+    let userPosts = await Queries.getPostsWithUser(user_id);
+    console.log(userPosts);
+}
+
+async function getAllLists(user_id) {
+    // impelement this
+}
+
+// [DELETE] /api/users
 exports.delete = {
+    auth: 'jwt',
     validate: {
-        params: {
+        payload: {
             password: Joi.string().required()
         }
     },
     handler: (request, reply) => {
+        console.log("hello");
 
         const password = request.payload.password;
         const user_id = request.auth.credentials.user_id;
-        
-        User.findById(user_id, (err, user) => {
+        console.log(user_id);
+        getAllPosts(user_id);
+        User.findById(user_id)
+            .select('+password')
+            .exec((err,user) => {
             if (err) {
                 return reply(Boom.internal('Error retrieving user'));
             } else if (user) {
+                console.log("HELP???")
+                console.log(user)
                 Bcrypt.compare(password, user.password, (err, res) => {
+                    console.log("HELP2")
+                    console.log(user.password)
+                    console.log(password)
                     if (err) {
+                        console.log("DEPRPP")
                         return reply(Boom.internal('Bcrypt comparison error'));
-                    } else if (res) {        
+                    } else if (res) { 
+                        console.log("HELP3")       
                         User.findByIdAndRemove(user_id, (err, user) => {
                             if (err) {
                                 return reply(Boom.internal('Error retrieving user'));
@@ -489,6 +512,7 @@ exports.delete = {
                     }
                 });
             } else {
+                console.log("did i get here");
                 return reply(Boom.badRequest('Bad credentials'));
             }
         });

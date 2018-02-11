@@ -29,6 +29,9 @@ const Schema = new Mongoose.Schema({
     resolved: {
         type: Boolean,    
         default: false
+    },
+    userId: {
+        type: String
     }
 });
 

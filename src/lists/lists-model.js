@@ -13,6 +13,9 @@ const Schema = new Mongoose.Schema({
     },
     posts: 
         [{ type : Mongoose.Schema.ObjectId, ref : 'Post' }],
+    userId: {
+        type: String
+    }
 });
 
 module.exports = Mongoose.model('List', Schema);

@@ -67,6 +67,7 @@ exports.createList = {
         let name = request.payload.name;
         let list = new List({
             name: name,
+            userId: user_id
         });
 
         list.save((err, list) => {
