@@ -9,23 +9,6 @@ const Queries = require('../utils/queries');
 const Utils = require('../utils/utils');
 
 
-// [GET] /api/pages/code/{page_id}
-exports.getPageCode = {
-    auth: 'jwt',
-    handler: (request, reply) => { 
-
-        let user_id = request.auth.credentials.user_id;
-        let page_id = request.params.page_id;
-
-        let page = Queries.getPage(page_id);
-        if (page === "error")
-            return reply(Boom.badRequest());
-
-        return reply(page.code);
-    }
-};
-
-
 // [GET] /api/pages/me
 exports.getPages = {
     auth: 'jwt',
@@ -52,10 +35,13 @@ exports.getPages = {
 
 // [GET] /api/pages/{page_id}
 exports.getPage = {
-    auth: 'jwt',
+    auth: {
+        strategy: 'jwt',
+        mode: 'try'
+    }, 
     handler: (request, reply) => { 
 
-        let user_id = request.auth.credentials.user_id;
+        let user_id = request.auth.credentials != null ? request.auth.credentials.user_id : null;
         let page_id = request.params.page_id;
 
         Page.findById(page_id)
@@ -76,12 +62,17 @@ exports.getPage = {
 };
 
 
-// [GET] /api/pages/search
+// [GET] /api/pages/{query}
 exports.searchPages = {
-    auth: 'jwt',
+    auth: {
+        strategy: 'jwt',
+        mode: 'try'
+    },     
     handler: (request, reply) => {
 
-        Page.find({name: new RegExp(request.query.q,'i'), private: false}, function(err, pages) {
+        const query = request.params.query;
+
+        Page.find({name: new RegExp(query,'i'), private: false}, function(err, pages) {
             if (err)
                 return reply(Boom.badRequest());
 
@@ -94,23 +85,6 @@ exports.searchPages = {
 
             return reply(pages);
         });
-    }
-};
-
-
-// [GET] /api/pages/search/code
-exports.searchCode = {
-    auth: 'jwt',
-    handler: (request, reply) => {
-
-        Page.findOne({code: request.query.q})
-            .select('-admins')
-            .exec((err, page) => {
-                if (err)
-                    return reply(Boom.badRequest());
-                
-                return reply({page: page});
-            });
     }
 };
 
@@ -173,17 +147,12 @@ exports.joinPage = {
 
         if (user.adminPages.includes(page_code) || user.contributorPages.includes(page_code))
             return reply({message: "already"});
-
-        console.log(page_code);
-        console.log(page.admin_code);
-        console.log(page.contributor_code);
         
         if (page_code === page.admin_code) {
             user.adminPages.push(page_id);
             page.admins.push(user_id);
             user.save();
             page.save();
-            console.log("1");
         }
 
         if (page_code === page.contributor_code) {
@@ -191,7 +160,6 @@ exports.joinPage = {
             page.contributors.push(user_id)
             user.save();
             page.save();
-            console.log("2");
         }
 
         return reply({message: "success"});
@@ -228,29 +196,6 @@ exports.followPage = {
         });
     }
 };
-
-
-// [PUT] /api/pages/refresh_code/{page_id}
-// exports.refreshCode = {
-//     auth: 'jwt',
-//     handler: async (request, reply) => {
-
-//         let user_id = request.auth.credentials.user_id;
-//         let page_id = request.params.page_id;
-        
-//         let page = await Queries.getPage(page_id);
-//         if (page === "error")
-//             return reply(Boom.badRequest());
-
-//         page.code = Utils.guid();
-//         page.save((err, page) => {
-//             if (err)
-//                 return reply(Boom.badRequest());
-  
-//             return reply({code: page.code});
-//         });
-//     }
-// };
 
 
 // [PUT] /api/pages/unfollow/{page_id}
@@ -302,9 +247,9 @@ exports.updatePage = {
 
         Page.findById(page_id, (err, page) => {
             let admins = page.admins.map((admin) => admin.toString());
-            if (err) {
+            if (err)
                 return reply(Boom.badRequest());
-            } else if (admins.includes(user_id)) {
+            else if (admins.includes(user_id)) {
                 page.name = request.payload.name;
                 page.description = request.payload.description;
                 page.save((err) => {
@@ -313,9 +258,8 @@ exports.updatePage = {
                     else
                         return reply({message: 'success'});
                 });
-            } else {
+            } else
                 return reply(Boom.forbidden('You must be an admin to perform this action.'));
-            }
         });
     }
 };

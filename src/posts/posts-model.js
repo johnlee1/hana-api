@@ -29,6 +29,16 @@ const Schema = new Mongoose.Schema({
     resolved: {
         type: Boolean,    
         default: false
+    },
+    page_name: {
+        type: String
+    },
+    author_name: {
+        type: String
+    },
+    author_id: { 
+        type : Mongoose.Schema.ObjectId, 
+        ref : 'User' 
     }
 });
 

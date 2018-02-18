@@ -3,7 +3,6 @@
 const Boom = require('boom');
 const Joi  = require('joi');
 
-const Group = require('../groups/groups-model');
 const Page  = require('../pages/pages-model');
 const Post  = require('./posts-model');
 const User  = require('../users/users-model');
@@ -68,6 +67,8 @@ exports.createPost = {
     validate: {
         payload: {
             id: Joi.string().required(), // page id
+            pageName: Joi.string().required(),
+            authorName: Joi.string().required(),
             prayer: Joi.string().required(),
             resolution: Joi.string().required(),
             resolved: Joi.boolean().required(),
@@ -78,6 +79,7 @@ exports.createPost = {
     },
     handler: async (request, reply) => {
 
+        const user_id = request.auth.credentials.user_id;
         const id = request.payload.id;
 
         let page = await Queries.getPage(id);
@@ -90,7 +92,10 @@ exports.createPost = {
             prayer: request.payload.prayer,
             resolved: request.payload.resolved,
             resolution: request.payload.resolution,
-            urgent: request.payload.urgent
+            urgent: request.payload.urgent,
+            page_name: request.payload.pageName,
+            author_name: request.payload.authorName,
+            author_id: user_id,
         });
 
         post.save((err, post) => {

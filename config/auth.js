@@ -3,9 +3,10 @@
 const HapiAuthJwt = require('hapi-auth-jwt2');
 const Moment = require('moment');
 
+
 function validate(decoded, token, cb) {
-    let ttl = 90000000;
-    let diff = Moment().diff(Moment(token.iat * 1000));
+    const ttl = 90000000;
+    const diff = Moment().diff(Moment(token.iat * 1000));
     if (diff > ttl)
         return cb(null, false);
 
@@ -13,7 +14,7 @@ function validate(decoded, token, cb) {
 }
 
 
-const register =  (server, options, next) => {
+const register = (server, options, next) => {
     server.register(HapiAuthJwt, (err) => {
         if (err)
             return next(err);

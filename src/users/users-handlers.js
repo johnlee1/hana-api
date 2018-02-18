@@ -17,7 +17,7 @@ const _privateKey = process.env.JWT_PRIVATE_KEY;
 // [GET] /api/test
 exports.test = {
     handler: (request,reply) => {
-        return reply('cc :)');
+        return reply('he is enough');
     }
 };
 
@@ -33,38 +33,39 @@ exports.confirm = {
 
         const token = request.params.token;
 
-        Jwt.verify(token, _privateKey, (err, decoded) => {
-            if (decoded === undefined) {
+        Jwt.verify(token, _privateKey, async (err, decoded) => {
+
+            if (decoded === undefined)
                 return reply(Boom.badRequest('Invalid verification link 1'));
-            }
-            const ttl = 90000000;
+
+            const ttl = 9999999999;
             const diff = Moment().diff(Moment(decoded.iat * 1000));
-            if (diff > ttl) {
+            if (diff > ttl)
                 return reply(Boom.badRequest('The token expired'));
-            } else if (decoded.user_id) {
-                User.findById(decoded.user_id, (err, user) => {
-                    if (err) {
-                        return reply(Boom.internal());
-                    } else if (!user) {
-                        return reply(Boom.badRequest('Invalid verification link 2'));
-                    } else {
-                        user.isVerified = true;
-                        user.save((err) => {
-                            if (err) {
-                                return reply(Boom.internal());
-                            } else {
-                                let tokenData = {
-                                    user_id: user._id,
-                                };
-                                let token = Jwt.sign(tokenData, _privateKey);
-                                return reply({message: 'success', token: token, user_id: user._id});
-                            }
-                        });
-                    }
-                });
-            } else {
+
+            else if (decoded.user_id) {
+                let user = await Queries.getUser(decoded.user_id);
+                if (user === "error")
+                    return reply(Boom.badRequest());
+                if (!user)
+                    return reply(Boom.badRequest('Invalid verification link 2'));
+                else {
+                    user.isVerified = true;
+                    user.save((err) => {
+                        if (err)
+                            return reply(Boom.internal());
+                        else {
+                            let tokenData = {
+                                user_id: user._id,
+                            };
+                            let token = Jwt.sign(tokenData, _privateKey);
+                            return reply({message: 'success', token: token, user_id: user._id});
+                        }
+                    });
+                }
+            } 
+            else
                 return reply(Boom.badRequest('Invalid verification link'));
-            }
         });
     }
 };
@@ -190,7 +191,7 @@ exports.searchUsers = {
         // const regexQuery = '^.*( |\\b)'+request.query.q+'( |\\b).*$';
         const regexQuery = request.query.q;
         User.find({name: new RegExp(regexQuery, 'i'), _id: { $ne: user_id }})
-            .select('-groups -adminPages -memberPages -following -followers -posts -email -isVerified')
+            .select('-adminPages -memberPages -following -followers -posts -email -isVerified')
             .exec(function(err, users) {
                 if (err)
                     return reply(Boom.badRequest());
@@ -299,31 +300,29 @@ exports.login = {
         const password = request.payload.password;
 
         User.findOne({email: email})
-            .select('+password -groups -adminPages -memberPages -following -followers -posts -email')
+            .select('+password -adminPages -memberPages -following -followers -posts -email')
             .exec((err, user) => {
-                if (err) {
+                if (err)
                     return reply({error:'Incorrect Login Information (1)'});
-                } else if (user && user.isVerified) {
+                else if (user && user.isVerified) {
                     Bcrypt.compare(password, user.password, (err, res) => {
-                        if (err) {
+                        if (err)
                             return reply({error:'Incorrect Login Information'});
-                        }
                         else if (res) {
                             let tokenData = {
                                 user_id: user._id
                             };
                             let token = Jwt.sign(tokenData, _privateKey);
-                            return reply({token: token, user_id: user._id});
+                            return reply({token: token, user_id: user._id, user_name: user.name});
                         } 
-                        else {
+                        else
                             return reply({error:'Incorrect Login Information (2)'});
-                        }
                     });
-                } else if (user && !user.isVerified) {
+                } 
+                else if (user && !user.isVerified)
                     return reply({error:'Email Address Verification Required'});
-                } else {
+                else
                     return reply({error:'Incorrect Login Information (3)'});
-                }
             });
     }
 };
@@ -344,49 +343,47 @@ exports.updatePassword = {
         const newPassword = request.payload.newPassword;
         const confirmNewPassword = request.payload.confirmNewPassword;
 
-        if (newPassword != confirmNewPassword) {
+        if (newPassword != confirmNewPassword)
             return reply(Boom.badRequest('Bad credentials'));
-        } else {
-
+        else {
             const user_id = request.auth.credentials.user_id;
 
             User.findById(user_id, (err, user) => {
-                if (err) {
+                if (err)
                     return reply(Boom.internal('Error retrieving user'));
-                } else if (user && user.isVerified) {
+                else if (user && user.isVerified) {
                     Bcrypt.compare(oldPassword, user.password, (err, res) => {
-                        if (err) {
+                        if (err)
                             return reply(Boom.internal('Bcrypt comparison error'));
-                        } else if (res) {
+                        else if (res) {
                             Bcrypt.genSalt(10, (err, salt) => {
-                                if (err) {
+                                if (err)
                                     return reply(Boom.internal());
-                                } else {
+                                else {
                                     Bcrypt.hash(newPassword, salt, (err, hash) => {
-                                        if (err) {
+                                        if (err)
                                             return reply(Boom.internal());
-                                        } else {
+                                        else {
                                             user.password = hash;
                                             user.save((err) => {
-                                                if (!err) {
+                                                if (!err)
                                                     return reply({success:'success'});
-                                                } else {
+                                                else
                                                     return reply(Boom.forbidden(err));
-                                                }
                                             });
                                         }
                                     });
                                 }
                             });
-                        } else {
+                        } 
+                        else
                             return reply(Boom.badRequest('Bad credentials'));
-                        }
                     });
-                } else if (user && !user.isVerified) {
+                } 
+                else if (user && !user.isVerified)
                     return reply(Boom.forbidden('You must verify your email address'));
-                } else {
+                else
                     return reply(Boom.badRequest('Bad credentials'));
-                }
             });
         }
     }
@@ -431,17 +428,15 @@ exports.unfollowUser = {
         
         User.findById(user_id, (err, user) => {
 
-            if (err) {
+            if (err)
                 return reply(Boom.internal('Error retrieving user'));
-            }
 
             user.following.pull({_id: unfollowed_user_id});
 
             User.findById(unfollowed_user_id, (err, unfollowed_user) => {
 
-                if (err) {
+                if (err)
                     return reply(Boom.badRequest());
-                } 
 
                 unfollowed_user.followers.pull({_id: user_id});
 
@@ -468,9 +463,9 @@ exports.delete = {
         const user_id = request.auth.credentials.user_id;
         
         User.findById(user_id, (err, user) => {
-            if (err) {
+            if (err)
                 return reply(Boom.internal('Error retrieving user'));
-            } else if (user) {
+            else if (user) {
                 Bcrypt.compare(password, user.password, (err, res) => {
                     if (err) {
                         return reply(Boom.internal('Bcrypt comparison error'));
