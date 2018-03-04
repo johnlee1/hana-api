@@ -271,7 +271,7 @@ exports.register = {
                         let token = Jwt.sign(tokenData, _privateKey);
                         try {
                             let templateFile = MailService.getMailTemplate('./src/mail/register.ejs');
-                            MailService.sendEmail('Verify your email address', templateFile, user.email, {token: token});
+                            MailService.sendEmail('Welcome Aboard!', templateFile, user.email, {token: token});
                             return reply({token: token, user_id: user._id});
                         } catch (e) {
                             return reply({error:'Sign up unsuccessful. Try again later.'});
