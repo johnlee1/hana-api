@@ -93,6 +93,7 @@ exports.createPost = {
             resolved: request.payload.resolved,
             resolution: request.payload.resolution,
             urgent: request.payload.urgent,
+            page_id: request.payload.id,
             page_name: request.payload.pageName,
             author_name: request.payload.authorName,
             author_id: user_id,

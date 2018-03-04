@@ -30,6 +30,10 @@ const Schema = new Mongoose.Schema({
         type: Boolean,    
         default: false
     },
+    page_id: {
+        type: Mongoose.Schema.ObjectId, 
+        ref: 'Page',
+    },
     page_name: {
         type: String
     },
