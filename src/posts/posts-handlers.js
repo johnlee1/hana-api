@@ -69,11 +69,9 @@ exports.createPost = {
             id: Joi.string().required(), // page id
             pageName: Joi.string().required(),
             authorName: Joi.string().required(),
-            prayer: Joi.string().required(),
             resolution: Joi.string().required(),
             resolved: Joi.boolean().required(),
             story: Joi.string().required(),
-            subject: Joi.string().required(),
             urgent: Joi.boolean().required(),
         }
     },
@@ -87,9 +85,7 @@ exports.createPost = {
             return reply(Boom.badRequest());
 
         let post = new Post({
-            subject: request.payload.subject,
             story: request.payload.story,
-            prayer: request.payload.prayer,
             resolved: request.payload.resolved,
             resolution: request.payload.resolution,
             urgent: request.payload.urgent,
