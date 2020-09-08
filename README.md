@@ -33,4 +33,4 @@ MAIL_PASSWORD
 
 
 ## gotchas
-* this is dumb but emptry string is not considered a valid string by hapi's joi
+* emptry string is not considered a valid string by hapi's joi
